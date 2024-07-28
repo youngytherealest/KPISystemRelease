@@ -1,0 +1,10 @@
+.venv/
+.vscode/
+DOCX/
+.env
+.env
+app/__pycache__/*
+app/utils/__pycache__/*
+*.pyc
+temp.pdf
+nohup.out
