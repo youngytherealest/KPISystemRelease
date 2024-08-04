@@ -216,6 +216,38 @@ async def home(request: Request, token: str = Cookie(None)):
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             permission = payload.get("permission")
             if permission == "user":
+                tong_nhan_vien = count_all_nhan_vien_controller()
+                tong_truong_phong = count_all_truong_phong_controller()
+                nv_da_diem_danh = count_nhan_vien_da_diem_danh_controller()
+                nv_chua_diem_danh = count_nhan_vien_chua_diem_danh_controller()
+                nhan_vien_theo_vai_tro = get_nhan_vien_theo_vai_tro()
+                phong_ban = get_tong_so_phong_ban()
+                employee_list = get_employee_list()
+                return templates.TemplateResponse(
+                    "index.html",
+                    context={
+                        "request": request,
+                        "dashboard_tongnhanvien": tong_nhan_vien,
+                        "dashboard_tongtruongphong": tong_truong_phong,
+                        "dashboard_nvdadiemdanh": nv_da_diem_danh,
+                        "dashboard_nvchuadiemdanh": nv_chua_diem_danh,
+                        "nhan_vien_theo_vai_tro": nhan_vien_theo_vai_tro,
+                        "phong_ban": phong_ban,
+                        "employee_list": employee_list,
+                    },
+                )
+            else:
+                return RedirectResponse("/sinhvien")
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+
+@app.get("/")
+async def home(request: Request, token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
                 tong_sinh_vien: int = count_all_sinh_vien_controller()
                 ti_le_da_danh_gia: float = ti_le_sinh_vien_da_danh_gia_controller()
                 so_luong_ket_qua: int = so_luong_sinh_vien_dat_ket_qua_controller()
