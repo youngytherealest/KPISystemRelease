@@ -182,7 +182,7 @@ def get_nhan_vien_theo_vai_tro():
         cursor = conn.cursor()
         result = cursor.execute(
             """
-            SELECT vt.tenvt, COUNT(*) as soluong
+            SELECT vt.tenvt AS role, COUNT(*) AS count
             FROM usercty_spkt u
             JOIN phanquyen_spkt pq ON u.id = pq.idu
             JOIN vaitro_spkt vt ON pq.idvt = vt.idvt
@@ -195,12 +195,11 @@ def get_nhan_vien_theo_vai_tro():
                 END
             """
         )
-        data = result.fetchall()
+        data = [{"role": row.role, "count": row.count} for row in result.fetchall()]
         conn.close()
-        return [{"role": row.tenvt, "count": row.soluong} for row in data]
+        return data
     except Exception as e:
-        print(f"Error: {e}")
-        return []
+        return str(e)
 
 
 def get_tong_so_phong_ban():
