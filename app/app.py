@@ -1,5 +1,6 @@
 from fastapi import (
     FastAPI,
+    Path,
     Request,
     Depends,
     HTTPException,
@@ -222,7 +223,6 @@ async def home(request: Request, token: str = Cookie(None)):
                 nv_chua_diem_danh = count_nhan_vien_chua_diem_danh_controller()
                 nhan_vien_theo_vai_tro = get_nhan_vien_theo_vai_tro()
                 phong_ban = get_tong_so_phong_ban()
-                employee_list = get_employee_list()
                 return templates.TemplateResponse(
                     "index.html",
                     context={
@@ -233,13 +233,75 @@ async def home(request: Request, token: str = Cookie(None)):
                         "dashboard_nvchuadiemdanh": nv_chua_diem_danh,
                         "nhan_vien_theo_vai_tro": nhan_vien_theo_vai_tro,
                         "phong_ban": phong_ban,
-                        "employee_list": employee_list,
                     },
                 )
             else:
                 return RedirectResponse("/sinhvien")
         except jwt.PyJWTError:
             return RedirectResponse("/login")
+
+
+@app.get("/get_all_chuc_vu")
+async def get_all_chuc_vu_route(token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                result = get_all_chuc_vu_controller()
+                if "error" in result:
+                    return JSONResponse(status_code=500, content=result)
+                return JSONResponse(status_code=200, content=result)
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
+
+
+@app.get("/get_all_trang_thai")
+async def get_all_trang_thai_route(token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                result = get_all_trang_thai_controller()
+                if "error" in result:
+                    return JSONResponse(status_code=500, content=result)
+                return JSONResponse(status_code=200, content=result)
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
+
+
+@app.get("/get_all_provinces")
+async def get_all_provinces_route(token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                result = get_all_provinces_controller()
+                if "error" in result:
+                    return JSONResponse(status_code=500, content=result)
+                return JSONResponse(status_code=200, content=result)
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
+
+
+@app.get("/get_all_nhan_vien")
+async def get_all_nhan_vien_route(token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                result = get_all_nhan_vien_controller()
+                return JSONResponse(status_code=200, content=result)
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
+
 
 @app.get("/")
 async def home(request: Request, token: str = Cookie(None)):

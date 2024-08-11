@@ -153,6 +153,8 @@
               </script>
               <!-- right col -->
               <!-- right col (We are only adding the ID to make the widgets sortable)-->
+
+              <!-- Danh Sách Nhân Viên -->
               <section class="col-lg-12 connectedSortable">
                 <div class="card">
                   <div class="card-header border-0">
@@ -162,60 +164,58 @@
                     </h3>
                   </div>
                   <div class="card-body">
+                    <div class="row mb-3">
+                      <div class="col-md-3">
+                        <label for="filterGender">Giới tính</label>
+                        <select class="form-control" id="filterGender">
+                          <option value="all">Tất cả</option>
+                          <option value="Nam">Nam</option>
+                          <option value="Nữ">Nữ</option>
+                        </select>
+                      </div>
+                      <div class="col-md-3">
+                        <label for="filterProvince">Tỉnh thành</label>
+                        <select class="form-control" id="filterProvince">
+                          <option value="all">Tất cả</option>
+                          <!-- Các tỉnh thành sẽ được thêm động từ database -->
+                        </select>
+                      </div>
+                      <div class="col-md-3">
+                        <label for="filterPosition">Chức vụ</label>
+                        <select class="form-control" id="filterPosition">
+                          <option value="all">Tất cả</option>
+                          <!-- Các chức vụ sẽ được thêm động từ database -->
+                        </select>
+                      </div>
+                      <div class="col-md-3">
+                        <label for="filterStatus">Trạng thái</label>
+                        <select class="form-control" id="filterStatus">
+                          <option value="all">Tất cả</option>
+                          <!-- Các trạng thái sẽ được thêm động từ database -->
+                        </select>
+                      </div>
+                    </div>
+                    <button class="btn btn-primary mb-3" id="filterButton">
+                      Lọc
+                    </button>
                     <table
                       class="table table-bordered table-hover display"
-                      id="dashboard_employee_list"
+                      id="dashboard_bangdsnv"
                     >
                       <thead>
                         <tr>
-                          <th scope="col" style="text-align: center">Id</th>
-                          <th scope="col" style="text-align: center">Tên</th>
-                          <th scope="col" style="text-align: center">
-                            Giới tính
-                          </th>
-                          <th scope="col" style="text-align: center">
-                            Ngày sinh
-                          </th>
-                          <th scope="col" style="text-align: center">
-                            Địa chỉ
-                          </th>
-                          <th scope="col" style="text-align: center">
-                            Điện thoại
-                          </th>
-                          <th scope="col" style="text-align: center">Email</th>
-                          <th scope="col" style="text-align: center">
-                            Chức vụ
-                          </th>
+                          <th scope="col">#</th>
+                          <th scope="col">ID</th>
+                          <th scope="col">Họ tên</th>
+                          <th scope="col">Giới tính</th>
+                          <th scope="col">Số điện thoại</th>
+                          <th scope="col">Email</th>
+                          <th scope="col">Địa chỉ</th>
+                          <th scope="col">Chức vụ</th>
+                          <th scope="col">Trạng thái</th>
                         </tr>
                       </thead>
-                      <tbody>
-                        {% for employee in employee_list %}
-                        <tr>
-                          <td style="text-align: center">{{ employee.id }}</td>
-                          <td style="text-align: center">
-                            {{ employee.hoten }}
-                          </td>
-                          <td style="text-align: center">
-                            {{ employee.gioitinh }}
-                          </td>
-                          <td style="text-align: center">
-                            {{ employee.ngaysinh }}
-                          </td>
-                          <td style="text-align: center">
-                            {{ employee.diachi }}
-                          </td>
-                          <td style="text-align: center">
-                            {{ employee.dienthoai }}
-                          </td>
-                          <td style="text-align: center">
-                            {{ employee.email }}
-                          </td>
-                          <td style="text-align: center">
-                            {{ employee.tenvt }}
-                          </td>
-                        </tr>
-                        {% endfor %}
-                      </tbody>
+                      <tbody></tbody>
                     </table>
                   </div>
                 </div>
@@ -295,25 +295,5 @@
       referrerpolicy="no-referrer"
     />
     <script src="dist/js/pages/dashboard.js"></script>
-    <script src="app/templates/dist/js/pages/dashboard4.js"></script>
-    <!-- DataTables -->
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css"
-    />
-
-    <!-- DataTables -->
-    <script
-      type="text/javascript"
-      charset="utf8"
-      src="https://code.jquery.com/jquery-3.5.1.js"
-    ></script>
-    <script
-      type="text/javascript"
-      charset="utf8"
-      src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"
-    ></script>
-    <!-- DataTables -->
   </body>
 </html>

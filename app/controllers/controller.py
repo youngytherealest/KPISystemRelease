@@ -43,6 +43,22 @@ def count_nhan_vien_chua_diem_danh_controller():
     return count_nhan_vien_chua_diem_danh()
 
 
+def get_all_nhan_vien_controller():
+    return get_all_nhan_vien()
+
+
+def get_all_chuc_vu_controller():
+    return get_all_chuc_vu()
+
+
+def get_all_trang_thai_controller():
+    return get_all_trang_thai()
+
+
+def get_all_provinces_controller():
+    return get_all_provinces()
+
+
 def count_all_sinh_vien_controller():
     return count_all_sinh_vien()
 

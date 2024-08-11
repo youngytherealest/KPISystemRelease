@@ -110,6 +110,67 @@ def get_all_sinh_vien():
         return e
 
 
+def get_all_nhan_vien():
+    try:
+        result = cursor.execute(
+            """
+            SELECT u.id, u.hoten, u.gioitinh, u.dienthoai, u.email, u.diachi, vt.tenvt, u.trangthai
+            FROM usercty_spkt u
+            LEFT JOIN phanquyen_spkt pq ON u.id = pq.idu
+            LEFT JOIN vaitro_spkt vt ON pq.idvt = vt.idvt
+            """
+        ).fetchall()
+
+        result_data = [
+            {
+                "id": i[0],
+                "hoten": i[1],
+                "gioitinh": i[2],
+                "dienthoai": i[3],
+                "email": i[4],
+                "diachi": i[5],
+                "tenvt": i[6],
+                "trangthai": bool(i[7]),  # Chuyển đổi giá trị bit sang boolean
+            }
+            for i in result
+        ]
+        print("Result Data: ", result_data)  # Log dữ liệu để kiểm tra
+        return result_data
+
+    except Exception as e:
+        print("Error: ", e)  # In lỗi ra console để dễ kiểm tra
+        return {"error": str(e)}
+
+
+def get_all_chuc_vu():
+    try:
+        result = cursor.execute("SELECT DISTINCT tenvt FROM vaitro_spkt").fetchall()
+        return [i[0] for i in result]
+    except Exception as e:
+        print("Error: ", e)
+        return {"error": str(e)}
+
+
+def get_all_trang_thai():
+    try:
+        result = cursor.execute(
+            "SELECT DISTINCT trangthai FROM usercty_spkt"
+        ).fetchall()
+        return [bool(i[0]) for i in result]  # Chuyển đổi giá trị bit sang boolean
+    except Exception as e:
+        print("Error: ", e)
+        return {"error": str(e)}
+
+
+def get_all_provinces():
+    try:
+        result = cursor.execute("SELECT DISTINCT diachi FROM usercty_spkt").fetchall()
+        return [i[0] for i in result]
+    except Exception as e:
+        print("Error: ", e)
+        return {"error": str(e)}
+
+
 def count_all_nhan_vien():
     try:
         conn = create_connection()
@@ -210,39 +271,6 @@ def get_tong_so_phong_ban():
         data = result.fetchall()
         conn.close()
         return [row.tenbp for row in data]
-    except Exception as e:
-        print(f"Error: {e}")
-        return []
-
-
-def get_employee_list():
-    try:
-        conn = create_connection()
-        cursor = conn.cursor()
-        result = cursor.execute(
-            """
-            SELECT u.id, u.hoten, u.gioitinh, u.ngaysinh, u.diachi, u.dienthoai, u.email, vt.tenvt
-            FROM usercty_spkt u
-            JOIN phanquyen_spkt pq ON u.id = pq.idu
-            JOIN vaitro_spkt vt ON pq.idvt = vt.idvt
-            ORDER BY u.id;
-            """
-        )
-        data = result.fetchall()
-        conn.close()
-        return [
-            {
-                "id": row.id,
-                "hoten": row.hoten,
-                "gioitinh": "Nam" if row.gioitinh else "Nữ",
-                "ngaysinh": row.ngaysinh.strftime("%Y-%m-%d"),
-                "diachi": row.diachi,
-                "dienthoai": row.dienthoai,
-                "email": row.email,
-                "tenvt": row.tenvt,
-            }
-            for row in data
-        ]
     except Exception as e:
         print(f"Error: {e}")
         return []

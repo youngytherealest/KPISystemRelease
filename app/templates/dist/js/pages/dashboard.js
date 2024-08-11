@@ -268,7 +268,6 @@ $(function () {
     });
   });
 });
-
 // xem/sửa thông tin sinh viên
 $("#dashboard_bangdssv").on("click", "#viewBtn", function () {
   let id = $(this).data("id");
@@ -499,7 +498,137 @@ $("#dashboard_bangdssv").on("click", "#viewBtn", function () {
     },
   });
 });
+// Thanh Phú
+$(document).ready(function () {
+  // Load danh sách chức vụ vào bộ lọc
+  $.ajax({
+    type: "GET",
+    url: "/get_all_chuc_vu",
+    success: function (data) {
+      if (data && data.length > 0) {
+        let positionSelect = $("#filterPosition");
+        data.forEach(function (position) {
+          positionSelect.append(new Option(position, position));
+        });
+      }
+    },
+  });
 
+  // Load danh sách trạng thái vào bộ lọc
+  $.ajax({
+    type: "GET",
+    url: "/get_all_trang_thai",
+    success: function (data) {
+      if (data && data.length > 0) {
+        let statusSelect = $("#filterStatus");
+        let hasWorking = false;
+        let hasNotWorking = false;
+        data.forEach(function (status) {
+          if (status === true) {
+            statusSelect.append(new Option("Đang làm việc", 1));
+            hasWorking = true;
+          } else if (status === false) {
+            statusSelect.append(new Option("Nghỉ việc", 0));
+            hasNotWorking = true;
+          }
+        });
+        if (!hasWorking) {
+          $("#filterStatus option[value='1']").prop("disabled", true);
+        }
+        if (!hasNotWorking) {
+          $("#filterStatus option[value='0']").prop("disabled", true);
+        }
+      }
+    },
+  });
+
+  // Load danh sách tỉnh thành vào bộ lọc
+  $.ajax({
+    type: "GET",
+    url: "/get_all_provinces",
+    success: function (data) {
+      if (data && data.length > 0) {
+        let provinceSelect = $("#filterProvince");
+        data.forEach(function (province) {
+          provinceSelect.append(new Option(province, province));
+        });
+      }
+    },
+  });
+
+  let dashboard_bangdsnv = $("#dashboard_bangdsnv").DataTable({
+    paging: true,
+    lengthChange: false,
+    searching: true,
+    pageLength: 20, // Giới hạn số lượng nhân viên hiển thị tối đa là 20
+    order: [[1, "asc"]], // Sắp xếp ID theo thứ tự tăng dần
+    info: true,
+    autoWidth: false,
+    responsive: true,
+    language: {
+      search: "Tìm Kiếm Nhanh:", // Thay đổi chữ "Search" thành "Tìm Kiếm Nhanh:"
+    },
+    ajax: {
+      type: "GET",
+      url: "/get_all_nhan_vien",
+      dataSrc: "",
+    },
+    columns: [
+      {
+        data: null,
+        render: function (data, type, row, meta) {
+          return "<center>" + (meta.row + 1) + "</center>";
+        },
+      },
+      { data: "id" },
+      { data: "hoten" },
+      {
+        data: "gioitinh",
+        render: function (data, type, row) {
+          return data == 0 ? "Nữ" : "Nam";
+        },
+      },
+      { data: "dienthoai" },
+      { data: "email" },
+      { data: "diachi" },
+      { data: "tenvt" },
+      {
+        data: "trangthai",
+        render: function (data, type, row) {
+          if (data == 1) {
+            return '<span style="color: green;">Đang làm việc</span>';
+          } else {
+            return '<span style="color: red;">Nghỉ việc</span>';
+          }
+        },
+      },
+    ],
+  });
+
+  $("#filterButton").on("click", function () {
+    let gender = $("#filterGender").val();
+    let position = $("#filterPosition").val();
+    let status = $("#filterStatus").val();
+    let province = $("#filterProvince").val();
+
+    dashboard_bangdsnv
+      .column(3)
+      .search(gender !== "all" ? gender : "")
+      .draw();
+    dashboard_bangdsnv
+      .column(7)
+      .search(position !== "all" ? position : "")
+      .draw();
+    dashboard_bangdsnv
+      .column(8)
+      .search(status !== "all" ? status : "")
+      .draw();
+    dashboard_bangdsnv
+      .column(6)
+      .search(province !== "all" ? province : "")
+      .draw();
+  });
+});
 // Submit sửa thông tin sinh viên
 
 // Xóa thông tin sinh viên
@@ -661,3 +790,71 @@ function convertDoHaiLong(num) {
     return `<span class="badge badge-danger">Không hài lòng</span>`;
   }
 }
+document.addEventListener("DOMContentLoaded", function () {
+  // Biểu đồ số lượng nhân viên theo vai trò
+  const nhanVienTheoVaiTro = JSON.parse(
+    document.getElementById("nhan_vien_theo_vai_tro").textContent
+  );
+  const labelsVaiTro = nhanVienTheoVaiTro.map((item) => item.role);
+  const dataVaiTro = nhanVienTheoVaiTro.map((item) => item.count);
+
+  const ctxRole = document.getElementById("role-chart-canvas").getContext("2d");
+  new Chart(ctxRole, {
+    type: "bar",
+    data: {
+      labels: labelsVaiTro,
+      datasets: [
+        {
+          label: "Số Lượng",
+          data: dataVaiTro,
+          backgroundColor: "rgba(54, 162, 235, 0.2)",
+          borderColor: "rgba(54, 162, 235, 1)",
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      scales: {
+        x: {
+          beginAtZero: true,
+        },
+        y: {
+          beginAtZero: true,
+          max: 10, // Đặt giá trị tối đa của trục y là 3
+          ticks: {
+            stepSize: 1, // Đặt khoảng cách giữa các giá trị trên trục y là 1
+          },
+        },
+      },
+    },
+  });
+
+  // Biểu đồ tổng số phòng ban của công ty
+  const phongBan = JSON.parse(document.getElementById("phong_ban").textContent);
+  const ctxDepartment = document
+    .getElementById("department-chart")
+    .getContext("2d");
+  new Chart(ctxDepartment, {
+    type: "doughnut",
+    data: {
+      labels: phongBan,
+      datasets: [
+        {
+          label: "Phòng Ban",
+          data: phongBan.map(() => 1),
+          backgroundColor: [
+            "rgba(255, 99, 132, 0.2)",
+            "rgba(54, 162, 235, 0.2)",
+            "rgba(255, 206, 86, 0.2)",
+          ],
+          borderColor: [
+            "rgba(255, 99, 132, 1)",
+            "rgba(54, 162, 235, 1)",
+            "rgba(255, 206, 86, 1)",
+          ],
+          borderWidth: 1,
+        },
+      ],
+    },
+  });
+});
