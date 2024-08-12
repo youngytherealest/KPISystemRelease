@@ -56,12 +56,11 @@
                 <!-- small box -->
                 <div class="small-box bg-warning">
                   <div class="inner">
-                    <h3>{{ dashboard_tongtruongphong }}</h3>
-
-                    <p>Tổng Số Trưởng Phòng</p>
+                    <h3>{{ dashboard_ti_le_cham_cong_trong_ngay }}%</h3>
+                    <p>Tỷ Lệ Nhân Viên Chấm Công Hôm Nay</p>
                   </div>
                   <div class="icon">
-                    <i class="fa-solid fa-users-line"></i>
+                    <i class="fas fa-clock"></i>
                   </div>
                 </div>
               </div>
@@ -153,7 +152,43 @@
               </script>
               <!-- right col -->
               <!-- right col (We are only adding the ID to make the widgets sortable)-->
+              <section class="col-lg-6 connectedSortable">
+                <!-- Attendance Rate Line Chart -->
+                <div class="card">
+                  <div class="card-header border-0">
+                    <h3 class="card-title">
+                      <i class="fa-solid fa-chart-line"></i>
+                      Tỷ lệ chấm công theo tháng
+                    </h3>
+                  </div>
+                  <div class="card-body">
+                    <canvas
+                      id="attendance_rate_line_chart"
+                      style="height: 250px; width: 100%"
+                    ></canvas>
+                  </div>
+                </div>
+                <!-- /.card -->
+              </section>
 
+              <section class="col-lg-6 connectedSortable">
+                <!-- Late/Early Rate Line Chart -->
+                <div class="card">
+                  <div class="card-header border-0">
+                    <h3 class="card-title">
+                      <i class="fa-solid fa-chart-line"></i>
+                      Tỷ lệ đi trễ/về sớm theo tháng
+                    </h3>
+                  </div>
+                  <div class="card-body">
+                    <canvas
+                      id="late_early_rate_line_chart"
+                      style="height: 250px; width: 100%"
+                    ></canvas>
+                  </div>
+                </div>
+                <!-- /.card -->
+              </section>
               <!-- Danh Sách Nhân Viên -->
               <section class="col-lg-12 connectedSortable">
                 <div class="card">

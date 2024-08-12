@@ -858,3 +858,122 @@ document.addEventListener("DOMContentLoaded", function () {
     },
   });
 });
+
+// Thanh Phú Tỷ lệ chấm công
+$(document).ready(function () {
+  // Load attendance rate data and create line chart
+  function loadMonthlyAttendanceRate() {
+    $.ajax({
+      type: "GET",
+      url: "/get_monthly_attendance_rate",
+      success: function (response) {
+        if (response.error) {
+          console.log("Error: ", response.error);
+          return;
+        }
+        let labels = response.map((item) => `Tháng ${item.month}`);
+        let data = response.map((item) => item.attendance_rate);
+        var ctx = document
+          .getElementById("attendance_rate_line_chart")
+          .getContext("2d");
+        var attendanceRateChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Tỷ lệ chấm công (%)",
+                data: data,
+                borderWidth: 1,
+                backgroundColor: "rgba(75, 192, 192, 0.2)",
+                borderColor: "rgba(75, 192, 192, 1)",
+                fill: true,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function (value) {
+                    return value + "%";
+                  },
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                position: "bottom",
+              },
+            },
+          },
+        });
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.log("AJAX call failed: ", textStatus, errorThrown);
+      },
+    });
+  }
+
+  // Load late/early rate data and create line chart
+  function loadMonthlyLateEarlyRate() {
+    $.ajax({
+      type: "GET",
+      url: "/get_monthly_late_early_rate",
+      success: function (response) {
+        if (response.error) {
+          console.log("Error: ", response.error);
+          return;
+        }
+        let labels = response.map((item) => `Tháng ${item.month}`);
+        let data = response.map((item) => item.late_early_rate);
+        var ctx = document
+          .getElementById("late_early_rate_line_chart")
+          .getContext("2d");
+        var lateEarlyRateChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Tỷ lệ đi trễ/về sớm (%)",
+                data: data,
+                borderWidth: 1,
+                backgroundColor: "rgba(255, 159, 64, 0.2)",
+                borderColor: "rgba(255, 159, 64, 1)",
+                fill: true,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function (value) {
+                    return value + "%";
+                  },
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                position: "bottom",
+              },
+            },
+          },
+        });
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.log("AJAX call failed: ", textStatus, errorThrown);
+      },
+    });
+  }
+
+  // Load initial data
+  loadMonthlyAttendanceRate();
+  loadMonthlyLateEarlyRate();
+});

@@ -31,8 +31,8 @@ def count_all_nhan_vien_controller():
     return count_all_nhan_vien()
 
 
-def count_all_truong_phong_controller():
-    return count_all_truong_phong()
+def ti_le_nhan_vien_cham_cong_trong_ngay_controller():
+    return ti_le_nhan_vien_cham_cong_trong_ngay()
 
 
 def count_nhan_vien_da_diem_danh_controller():
@@ -57,6 +57,15 @@ def get_all_trang_thai_controller():
 
 def get_all_provinces_controller():
     return get_all_provinces()
+
+
+# Tỉ Lệ Chấm Công
+def get_monthly_attendance_rate_controller():
+    return get_monthly_attendance_rate()
+
+
+def get_monthly_late_early_rate_controller():
+    return get_monthly_late_early_rate()
 
 
 def count_all_sinh_vien_controller():

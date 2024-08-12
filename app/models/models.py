@@ -171,6 +171,67 @@ def get_all_provinces():
         return {"error": str(e)}
 
 
+# Biểu đồ thống kê Tỷ lệ chấm công
+def get_monthly_attendance_rate():
+    try:
+        result = []
+        for month in range(1, 13):
+            start_date = datetime.datetime(datetime.datetime.now().year, month, 1)
+            end_date = (start_date + timedelta(days=32)).replace(day=1) - timedelta(
+                days=1
+            )
+            total_employees = cursor.execute(
+                "SELECT COUNT(*) FROM usercty_spkt"
+            ).fetchone()[0]
+            attended_count = cursor.execute(
+                """
+                SELECT COUNT(DISTINCT idu) 
+                FROM chamcong_spkt 
+                WHERE ngaythang BETWEEN ? AND ?
+            """,
+                (start_date, end_date),
+            ).fetchone()[0]
+            attendance_rate = (
+                (attended_count / total_employees) * 100 if total_employees else 0
+            )
+            result.append({"month": month, "attendance_rate": attendance_rate})
+        return result
+    except Exception as e:
+        print("Error in get_monthly_attendance_rate: ", e)
+        return {"error": str(e)}
+
+
+def get_monthly_late_early_rate():
+    try:
+        result = []
+        for month in range(1, 13):
+            start_date = datetime.datetime(datetime.datetime.now().year, month, 1)
+            end_date = (start_date + timedelta(days=32)).replace(day=1) - timedelta(
+                days=1
+            )
+            total_employees = cursor.execute(
+                "SELECT COUNT(*) FROM usercty_spkt"
+            ).fetchone()[0]
+            late_early_count = cursor.execute(
+                """
+                SELECT COUNT(DISTINCT cc.idu)
+                FROM chamcong_spkt cc
+                JOIN ca_lam_spkt cl ON cc.idclv = cl.idclv
+                WHERE (cc.giovao > cl.tg_bd OR cc.giora < cl.tg_kt)
+                AND cc.ngaythang BETWEEN ? AND ?
+            """,
+                (start_date, end_date),
+            ).fetchone()[0]
+            late_early_rate = (
+                (late_early_count / total_employees) * 100 if total_employees else 0
+            )
+            result.append({"month": month, "late_early_rate": late_early_rate})
+        return result
+    except Exception as e:
+        print("Error in get_monthly_late_early_rate: ", e)
+        return {"error": str(e)}
+
+
 def count_all_nhan_vien():
     try:
         conn = create_connection()
@@ -184,20 +245,40 @@ def count_all_nhan_vien():
         return e
 
 
-def count_all_truong_phong():
+def ti_le_nhan_vien_cham_cong_trong_ngay():
     try:
         conn = create_connection()
         cursor = conn.cursor()
-        result = cursor.execute("SELECT COUNT(*) FROM usercty_spkt WHERE idpb='2'")
-        count = result.fetchone()[0]
+
+        # Tổng số nhân viên
+        total_employees = cursor.execute(
+            "SELECT COUNT(*) FROM usercty_spkt"
+        ).fetchone()[0]
+
+        # Số nhân viên đã chấm công hôm nay
+        today = datetime.date.today()
+        attended_count = cursor.execute(
+            """
+            SELECT COUNT(DISTINCT idu)
+            FROM chamcong_spkt
+            WHERE ngaythang = ?
+        """,
+            (today,),
+        ).fetchone()[0]
+
+        # Tính tỷ lệ phần trăm
+        attendance_rate = (
+            (attended_count / total_employees) * 100 if total_employees else 0
+        )
+
         conn.close()
-        return count
+        return attendance_rate
     except Exception as e:
         print(f"Error: {e}")
         return e
 
 
-from datetime import date
+from datetime import date, timedelta
 
 
 def count_nhan_vien_da_diem_danh():

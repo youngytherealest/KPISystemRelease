@@ -1,6 +1,7 @@
 from fastapi import (
     FastAPI,
     Path,
+    Query,
     Request,
     Depends,
     HTTPException,
@@ -218,7 +219,9 @@ async def home(request: Request, token: str = Cookie(None)):
             permission = payload.get("permission")
             if permission == "user":
                 tong_nhan_vien = count_all_nhan_vien_controller()
-                tong_truong_phong = count_all_truong_phong_controller()
+                ti_le_cham_cong_trong_ngay = (
+                    ti_le_nhan_vien_cham_cong_trong_ngay_controller()
+                )
                 nv_da_diem_danh = count_nhan_vien_da_diem_danh_controller()
                 nv_chua_diem_danh = count_nhan_vien_chua_diem_danh_controller()
                 nhan_vien_theo_vai_tro = get_nhan_vien_theo_vai_tro()
@@ -228,7 +231,7 @@ async def home(request: Request, token: str = Cookie(None)):
                     context={
                         "request": request,
                         "dashboard_tongnhanvien": tong_nhan_vien,
-                        "dashboard_tongtruongphong": tong_truong_phong,
+                        "dashboard_ti_le_cham_cong_trong_ngay": ti_le_cham_cong_trong_ngay,
                         "dashboard_nvdadiemdanh": nv_da_diem_danh,
                         "dashboard_nvchuadiemdanh": nv_chua_diem_danh,
                         "nhan_vien_theo_vai_tro": nhan_vien_theo_vai_tro,
@@ -239,6 +242,7 @@ async def home(request: Request, token: str = Cookie(None)):
                 return RedirectResponse("/sinhvien")
         except jwt.PyJWTError:
             return RedirectResponse("/login")
+    return RedirectResponse("/login")
 
 
 @app.get("/get_all_chuc_vu")
@@ -297,6 +301,39 @@ async def get_all_nhan_vien_route(token: str = Cookie(None)):
             permission = payload.get("permission")
             if permission == "user":
                 result = get_all_nhan_vien_controller()
+                return JSONResponse(status_code=200, content=result)
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
+
+
+# Tỷ Lệ Chấm Công
+@app.get("/get_monthly_attendance_rate")
+async def get_monthly_attendance_rate_route(token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                result = get_monthly_attendance_rate_controller()
+                if "error" in result:
+                    return JSONResponse(status_code=500, content=result)
+                return JSONResponse(status_code=200, content=result)
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
+
+
+@app.get("/get_monthly_late_early_rate")
+async def get_monthly_late_early_rate_route(token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                result = get_monthly_late_early_rate_controller()
+                if "error" in result:
+                    return JSONResponse(status_code=500, content=result)
                 return JSONResponse(status_code=200, content=result)
         except jwt.PyJWTError:
             return RedirectResponse("/login")
