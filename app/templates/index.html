@@ -125,31 +125,11 @@
               </section>
               <!-- /.Left col -->
               <!-- right col (We are only adding the ID to make the widgets sortable)-->
-              <section class="col-lg-6 connectedSortable">
-                <!-- Map card -->
-                <div class="card">
-                  <div class="card-header border-0">
-                    <h3 class="card-title">
-                      <i class="fa-solid fa-chart-pie"></i>
-                      Tổng Số Phòng Ban Của Công Ty
-                    </h3>
-                  </div>
-                  <div class="card-body">
-                    <canvas
-                      id="department-chart"
-                      style="height: 250px; width: 100%"
-                    ></canvas>
-                  </div>
-                </div>
-                <!-- /.card -->
-              </section>
 
               <script id="nhan_vien_theo_vai_tro" type="application/json">
                 {{ nhan_vien_theo_vai_tro | tojson }}
               </script>
-              <script id="phong_ban" type="application/json">
-                {{ phong_ban | tojson }}
-              </script>
+
               <!-- right col -->
               <!-- right col (We are only adding the ID to make the widgets sortable)-->
               <section class="col-lg-6 connectedSortable">
@@ -171,24 +151,6 @@
                 <!-- /.card -->
               </section>
 
-              <section class="col-lg-6 connectedSortable">
-                <!-- Late/Early Rate Line Chart -->
-                <div class="card">
-                  <div class="card-header border-0">
-                    <h3 class="card-title">
-                      <i class="fa-solid fa-chart-line"></i>
-                      Tỷ lệ đi trễ/về sớm theo tháng
-                    </h3>
-                  </div>
-                  <div class="card-body">
-                    <canvas
-                      id="late_early_rate_line_chart"
-                      style="height: 250px; width: 100%"
-                    ></canvas>
-                  </div>
-                </div>
-                <!-- /.card -->
-              </section>
               <!-- Danh Sách Nhân Viên -->
               <section class="col-lg-12 connectedSortable">
                 <div class="card">

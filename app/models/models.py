@@ -201,37 +201,6 @@ def get_monthly_attendance_rate():
         return {"error": str(e)}
 
 
-def get_monthly_late_early_rate():
-    try:
-        result = []
-        for month in range(1, 13):
-            start_date = datetime.datetime(datetime.datetime.now().year, month, 1)
-            end_date = (start_date + timedelta(days=32)).replace(day=1) - timedelta(
-                days=1
-            )
-            total_employees = cursor.execute(
-                "SELECT COUNT(*) FROM usercty_spkt"
-            ).fetchone()[0]
-            late_early_count = cursor.execute(
-                """
-                SELECT COUNT(DISTINCT cc.idu)
-                FROM chamcong_spkt cc
-                JOIN ca_lam_spkt cl ON cc.idclv = cl.idclv
-                WHERE (cc.giovao > cl.tg_bd OR cc.giora < cl.tg_kt)
-                AND cc.ngaythang BETWEEN ? AND ?
-            """,
-                (start_date, end_date),
-            ).fetchone()[0]
-            late_early_rate = (
-                (late_early_count / total_employees) * 100 if total_employees else 0
-            )
-            result.append({"month": month, "late_early_rate": late_early_rate})
-        return result
-    except Exception as e:
-        print("Error in get_monthly_late_early_rate: ", e)
-        return {"error": str(e)}
-
-
 def count_all_nhan_vien():
     try:
         conn = create_connection()
@@ -342,19 +311,6 @@ def get_nhan_vien_theo_vai_tro():
         return data
     except Exception as e:
         return str(e)
-
-
-def get_tong_so_phong_ban():
-    try:
-        conn = create_connection()
-        cursor = conn.cursor()
-        result = cursor.execute("SELECT tenbp FROM bophan_spkt")
-        data = result.fetchall()
-        conn.close()
-        return [row.tenbp for row in data]
-    except Exception as e:
-        print(f"Error: {e}")
-        return []
 
 
 def count_all_sinh_vien():

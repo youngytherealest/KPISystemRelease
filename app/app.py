@@ -225,7 +225,7 @@ async def home(request: Request, token: str = Cookie(None)):
                 nv_da_diem_danh = count_nhan_vien_da_diem_danh_controller()
                 nv_chua_diem_danh = count_nhan_vien_chua_diem_danh_controller()
                 nhan_vien_theo_vai_tro = get_nhan_vien_theo_vai_tro()
-                phong_ban = get_tong_so_phong_ban()
+
                 return templates.TemplateResponse(
                     "index.html",
                     context={
@@ -235,7 +235,6 @@ async def home(request: Request, token: str = Cookie(None)):
                         "dashboard_nvdadiemdanh": nv_da_diem_danh,
                         "dashboard_nvchuadiemdanh": nv_chua_diem_danh,
                         "nhan_vien_theo_vai_tro": nhan_vien_theo_vai_tro,
-                        "phong_ban": phong_ban,
                     },
                 )
             else:
@@ -323,21 +322,6 @@ async def get_monthly_attendance_rate_route(token: str = Cookie(None)):
             return RedirectResponse("/login")
     return RedirectResponse("/login")
 
-
-@app.get("/get_monthly_late_early_rate")
-async def get_monthly_late_early_rate_route(token: str = Cookie(None)):
-    if token:
-        try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            permission = payload.get("permission")
-            if permission == "user":
-                result = get_monthly_late_early_rate_controller()
-                if "error" in result:
-                    return JSONResponse(status_code=500, content=result)
-                return JSONResponse(status_code=200, content=result)
-        except jwt.PyJWTError:
-            return RedirectResponse("/login")
-    return RedirectResponse("/login")
 
 
 @app.get("/")

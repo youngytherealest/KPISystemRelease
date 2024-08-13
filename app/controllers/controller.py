@@ -64,10 +64,6 @@ def get_monthly_attendance_rate_controller():
     return get_monthly_attendance_rate()
 
 
-def get_monthly_late_early_rate_controller():
-    return get_monthly_late_early_rate()
-
-
 def count_all_sinh_vien_controller():
     return count_all_sinh_vien()
 
