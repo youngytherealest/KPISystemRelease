@@ -964,3 +964,76 @@ $(document).ready(function () {
       .load();
   };
 });
+
+// Thanh Phú biểu đồ hiệu suất
+function loadPerformanceChart() {
+  let monthYear = $("#filterMonthYear").val();
+  let month = "";
+  let year = "";
+
+  if (monthYear) {
+    [year, month] = monthYear.split("-");
+  }
+
+  let filter = {
+    month: month,
+    year: year,
+  };
+
+  $.ajax({
+    type: "GET",
+    url: "/get_performance_by_department",
+    data: filter,
+    success: function (response) {
+      let departments = [];
+      let hours = [];
+
+      $.each(response, function (idx, val) {
+        departments.push(val["department"]);
+        hours.push(val["hours"]);
+      });
+
+      var performanceChart = document
+        .getElementById("performance-chart-canvas")
+        .getContext("2d");
+      var myPerformanceChart = new Chart(performanceChart, {
+        type: "bar",
+        data: {
+          labels: departments,
+          datasets: [
+            {
+              data: hours,
+              borderWidth: 1,
+              backgroundColor: [
+                "rgba(255, 99, 132, 0.8)",
+                "rgba(255, 159, 64, 0.8)",
+                "rgba(255, 205, 86, 0.8)",
+                "rgba(75, 192, 192, 0.8)",
+                "rgba(54, 162, 235, 0.8)",
+                "rgba(153, 102, 255, 0.8)",
+                "rgba(201, 203, 207, 0.8)",
+              ],
+            },
+          ],
+          hoverOffset: 1,
+        },
+        options: {
+          indexAxis: "y",
+          responsive: true,
+          plugins: {
+            legend: false,
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+            },
+          },
+        },
+      });
+    },
+  });
+}
+
+$(document).ready(function () {
+  loadPerformanceChart(); // Load chart on page load
+});

@@ -358,6 +358,22 @@ async def get_all_nhan_vien_khong_cham_cong_route(
     return RedirectResponse("/login")
 
 
+# Biểu đồ tỷ lệ chấm công theo tháng
+@app.get("/get_performance_by_department")
+async def get_performance_by_department_route(
+    token: str = Cookie(None), month: str = "", year: str = ""
+):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                return get_performance_by_department_controller(month, year)
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
+
+
 @app.get("/")
 async def home(request: Request, token: str = Cookie(None)):
     if token:
@@ -3961,3 +3977,6 @@ async def get_ds_chuc_nang_by_user_id_route(token: str = Cookie(None)):
         except jwt.PyJWTError:
             return RedirectResponse("/login")
     return RedirectResponse("/login")
+
+
+# Mục Điểm Danh Của Trang Login

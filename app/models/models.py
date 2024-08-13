@@ -238,6 +238,36 @@ def get_all_nhan_vien_khong_cham_cong(department, position, date):
         return {"error": str(e)}
 
 
+# Biểu đồ hiệu suất làm việc theo tháng của phòng ban
+def get_performance_by_department(month, year):
+    try:
+        query = """
+            SELECT pb.tenpb AS department, SUM(DATEDIFF(MINUTE, cc.giovao, cc.giora)/60.0) AS hours
+            FROM chamcong_spkt cc
+            JOIN usercty_spkt u ON cc.idu = u.id
+            JOIN phongban_spkt pb ON u.idpb = pb.idpb
+            WHERE 1=1
+        """
+        params = []
+
+        if month:
+            query += " AND MONTH(cc.ngaythang) = ?"
+            params.append(month)
+
+        if year:
+            query += " AND YEAR(cc.ngaythang) = ?"
+            params.append(year)
+
+        query += " GROUP BY pb.tenpb"
+
+        result = cursor.execute(query, params).fetchall()
+        return [{"department": i[0], "hours": i[1]} for i in result]
+
+    except Exception as e:
+        print("Error: ", e)
+        return {"error": str(e)}
+
+
 # Biểu đồ thống kê Tỷ lệ chấm công
 def get_monthly_attendance_rate():
     try:
@@ -281,6 +311,9 @@ def count_all_nhan_vien():
         return e
 
 
+import datetime
+
+
 def ti_le_nhan_vien_cham_cong_trong_ngay():
     try:
         conn = create_connection()
@@ -307,8 +340,11 @@ def ti_le_nhan_vien_cham_cong_trong_ngay():
             (attended_count / total_employees) * 100 if total_employees else 0
         )
 
+        # Làm tròn đến 2 chữ số thập phân
+        rounded_attendance_rate = round(attendance_rate, 2)
+
         conn.close()
-        return attendance_rate
+        return rounded_attendance_rate
     except Exception as e:
         print(f"Error: {e}")
         return e

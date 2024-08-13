@@ -73,6 +73,11 @@ def get_monthly_attendance_rate_controller():
     return get_monthly_attendance_rate()
 
 
+# Biểu Đồ Hiệu Suất Chấm Công Theo Tháng
+def get_performance_by_department_controller(month, year):
+    return get_performance_by_department(month, year)
+
+
 def count_all_sinh_vien_controller():
     return count_all_sinh_vien()
 

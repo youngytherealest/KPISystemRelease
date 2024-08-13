@@ -150,6 +150,52 @@
                 </div>
                 <!-- /.card -->
               </section>
+
+              <!-- Biểu đồ phân tích hiệu suất làm việc theo phòng ban  -->
+              <section class="col-lg-6 connectedSortable">
+                <!-- Custom tabs (Charts with tabs)-->
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">
+                      <i class="fa-solid fa-chart-bar"></i>
+                      Hiệu suất làm việc theo phòng ban
+                    </h3>
+                    <div align="right">
+                      <small
+                        ><em
+                          >Hiệu suất làm việc = Tổng số giờ làm việc của nhân
+                          viên</em
+                        ></small
+                      >
+                    </div>
+                  </div>
+                  <!-- /.card-header -->
+                  <div class="card-body">
+                    <div class="row mb-3">
+                      <div class="col-md-6">
+                        <label for="filterMonthYear">Tháng/Năm</label>
+                        <input
+                          type="month"
+                          class="form-control"
+                          id="filterMonthYear"
+                          onchange="loadPerformanceChart()"
+                        />
+                      </div>
+                    </div>
+                    <div class="tab-content p-0">
+                      <div class="chart tab-pane active" id="performance-chart">
+                        <canvas
+                          id="performance-chart-canvas"
+                          style="height: 250px; width: 100%"
+                        ></canvas>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+              </section>
+
               <!-- Danh Sách Nhân Viên Chưa Chấm Công -->
 
               <section class="col-lg-12 connectedSortable">
