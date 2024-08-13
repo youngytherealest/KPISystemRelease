@@ -51,12 +51,21 @@ def get_all_chuc_vu_controller():
     return get_all_chuc_vu()
 
 
+def get_all_phong_ban_controller():
+    return get_all_phong_ban()
+
+
 def get_all_trang_thai_controller():
     return get_all_trang_thai()
 
 
 def get_all_provinces_controller():
     return get_all_provinces()
+
+
+# Nhân Viên Chưa Chấm Công
+def get_all_nhan_vien_khong_cham_cong_controller(department, position, date):
+    return get_all_nhan_vien_khong_cham_cong(department, position, date)
 
 
 # Tỉ Lệ Chấm Công

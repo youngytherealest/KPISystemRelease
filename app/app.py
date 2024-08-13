@@ -244,6 +244,22 @@ async def home(request: Request, token: str = Cookie(None)):
     return RedirectResponse("/login")
 
 
+@app.get("/get_all_phong_ban")
+async def get_all_phong_ban_route(token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                result = get_all_phong_ban_controller()
+                if "error" in result:
+                    return JSONResponse(status_code=500, content=result)
+                return JSONResponse(status_code=200, content=result)
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
+
+
 @app.get("/get_all_chuc_vu")
 async def get_all_chuc_vu_route(token: str = Cookie(None)):
     if token:
@@ -322,6 +338,24 @@ async def get_monthly_attendance_rate_route(token: str = Cookie(None)):
             return RedirectResponse("/login")
     return RedirectResponse("/login")
 
+
+# Nhân Viên Chưa Chấm Công
+@app.get("/get_all_nhan_vien_khong_cham_cong")
+async def get_all_nhan_vien_khong_cham_cong_route(
+    token: str = Cookie(None), department: str = "", position: str = "", date: str = ""
+):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                result = get_all_nhan_vien_khong_cham_cong_controller(
+                    department, position, date
+                )
+                return JSONResponse(status_code=200, content=result)
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
 
 
 @app.get("/")

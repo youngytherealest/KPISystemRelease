@@ -151,12 +151,24 @@ def get_all_chuc_vu():
         return {"error": str(e)}
 
 
+def get_all_phong_ban():
+    try:
+        result = cursor.execute("SELECT DISTINCT tenpb FROM phongban_spkt").fetchall()
+        return [i[0] for i in result]
+    except Exception as e:
+        print("Error: ", e)
+        return {"error": str(e)}
+
+
 def get_all_trang_thai():
     try:
         result = cursor.execute(
             "SELECT DISTINCT trangthai FROM usercty_spkt"
         ).fetchall()
-        return [bool(i[0]) for i in result]  # Chuyển đổi giá trị bit sang boolean
+        return [
+            {"label": "Đang làm việc", "value": 1},
+            {"label": "Nghỉ việc", "value": 0},
+        ]
     except Exception as e:
         print("Error: ", e)
         return {"error": str(e)}
@@ -166,6 +178,61 @@ def get_all_provinces():
     try:
         result = cursor.execute("SELECT DISTINCT diachi FROM usercty_spkt").fetchall()
         return [i[0] for i in result]
+    except Exception as e:
+        print("Error: ", e)
+        return {"error": str(e)}
+
+
+# Thống kê nhân viên chưa chấm công
+def get_all_nhan_vien_khong_cham_cong(department, position, date):
+    try:
+        base_query = """
+            SELECT u.id, u.hoten, u.gioitinh, u.dienthoai, u.email, u.diachi, vt.tenvt, pb.tenpb
+            FROM usercty_spkt u
+            LEFT JOIN phanquyen_spkt pq ON u.id = pq.idu
+            LEFT JOIN vaitro_spkt vt ON pq.idvt = vt.idvt
+            LEFT JOIN phongban_spkt pb ON u.idpb = pb.idpb
+            WHERE u.id NOT IN (
+                SELECT cc.idu
+                FROM chamcong_spkt cc
+                WHERE cc.ngaythang = ?
+                AND cc.giovao <= '07:30:00'
+            )
+        """
+
+        conditions = []
+        params = [date]
+
+        if department:
+            conditions.append(
+                "u.idpb = (SELECT idpb FROM phongban_spkt WHERE tenpb = ?)"
+            )
+            params.append(department)
+        if position:
+            conditions.append("vt.tenvt = ?")
+            params.append(position)
+
+        if conditions:
+            base_query += " AND " + " AND ".join(conditions)
+
+        result = cursor.execute(base_query, params).fetchall()
+
+        result_data = [
+            {
+                "id": i[0],
+                "hoten": i[1],
+                "gioitinh": i[2],
+                "dienthoai": i[3],
+                "email": i[4],
+                "diachi": i[5],
+                "tenvt": i[6],
+                "tenpb": i[7],
+                "trangthai": "Chưa Chấm Công",  # Thêm cột trạng thái
+            }
+            for i in result
+        ]
+        return result_data
+
     except Exception as e:
         print("Error: ", e)
         return {"error": str(e)}

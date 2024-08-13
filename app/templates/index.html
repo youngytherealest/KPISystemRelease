@@ -150,6 +150,74 @@
                 </div>
                 <!-- /.card -->
               </section>
+              <!-- Danh Sách Nhân Viên Chưa Chấm Công -->
+
+              <section class="col-lg-12 connectedSortable">
+                <div class="card">
+                  <div class="card-header border-0">
+                    <h3 class="card-title">
+                      <i class="fa-solid fa-list-ol"></i>
+                      Báo cáo chi tiết nhân viên chưa chấm công trong ngày
+                    </h3>
+                  </div>
+                  <div class="card-body">
+                    <div class="row mb-3">
+                      <div class="col-md-3">
+                        <label for="reportDepartment">Phòng Ban</label>
+                        <select
+                          class="form-control"
+                          id="reportDepartment"
+                          onchange="filterReport()"
+                        >
+                          <option value="all">Tất cả</option>
+                          <!-- Các phòng ban sẽ được thêm động từ database -->
+                        </select>
+                      </div>
+                      <div class="col-md-3">
+                        <label for="reportPosition">Chức Vụ</label>
+                        <select
+                          class="form-control"
+                          id="reportPosition"
+                          onchange="filterReport()"
+                        >
+                          <option value="all">Tất cả</option>
+                          <!-- Các chức vụ sẽ được thêm động từ database -->
+                        </select>
+                      </div>
+                      <div class="col-md-3">
+                        <label for="reportDate">Ngày</label>
+                        <input
+                          type="date"
+                          class="form-control"
+                          id="reportDate"
+                          onchange="filterReport()"
+                        />
+                      </div>
+                    </div>
+                    <table
+                      class="table table-bordered table-hover display"
+                      id="dashboard_bangdsnv_kcc"
+                    >
+                      <thead>
+                        <tr>
+                          <th scope="col">#</th>
+                          <th scope="col">ID</th>
+                          <th scope="col">Họ tên</th>
+                          <th scope="col">Giới tính</th>
+                          <th scope="col">Số điện thoại</th>
+                          <th scope="col">Email</th>
+                          <th scope="col">Địa chỉ</th>
+                          <th scope="col">Chức vụ</th>
+                          <th scope="col">Phòng ban</th>
+                          <th scope="col">Trạng thái</th>
+                          <!-- Thêm cột Trạng thái -->
+                        </tr>
+                      </thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </div>
+              </section>
 
               <!-- Danh Sách Nhân Viên -->
               <section class="col-lg-12 connectedSortable">
@@ -164,7 +232,11 @@
                     <div class="row mb-3">
                       <div class="col-md-3">
                         <label for="filterGender">Giới tính</label>
-                        <select class="form-control" id="filterGender">
+                        <select
+                          class="form-control"
+                          id="filterGender"
+                          onchange="filterTable()"
+                        >
                           <option value="all">Tất cả</option>
                           <option value="Nam">Nam</option>
                           <option value="Nữ">Nữ</option>
@@ -172,29 +244,38 @@
                       </div>
                       <div class="col-md-3">
                         <label for="filterProvince">Tỉnh thành</label>
-                        <select class="form-control" id="filterProvince">
+                        <select
+                          class="form-control"
+                          id="filterProvince"
+                          onchange="filterTable()"
+                        >
                           <option value="all">Tất cả</option>
                           <!-- Các tỉnh thành sẽ được thêm động từ database -->
                         </select>
                       </div>
                       <div class="col-md-3">
                         <label for="filterPosition">Chức vụ</label>
-                        <select class="form-control" id="filterPosition">
+                        <select
+                          class="form-control"
+                          id="filterPosition"
+                          onchange="filterTable()"
+                        >
                           <option value="all">Tất cả</option>
                           <!-- Các chức vụ sẽ được thêm động từ database -->
                         </select>
                       </div>
                       <div class="col-md-3">
                         <label for="filterStatus">Trạng thái</label>
-                        <select class="form-control" id="filterStatus">
+                        <select
+                          class="form-control"
+                          id="filterStatus"
+                          onchange="filterTable()"
+                        >
                           <option value="all">Tất cả</option>
                           <!-- Các trạng thái sẽ được thêm động từ database -->
                         </select>
                       </div>
                     </div>
-                    <button class="btn btn-primary mb-3" id="filterButton">
-                      Lọc
-                    </button>
                     <table
                       class="table table-bordered table-hover display"
                       id="dashboard_bangdsnv"

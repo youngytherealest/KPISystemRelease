@@ -498,7 +498,7 @@ $("#dashboard_bangdssv").on("click", "#viewBtn", function () {
     },
   });
 });
-// Thanh Phú
+// Thanh Phú Danh Sách Nhân Viên
 $(document).ready(function () {
   // Load danh sách chức vụ vào bộ lọc
   $.ajax({
@@ -521,23 +521,8 @@ $(document).ready(function () {
     success: function (data) {
       if (data && data.length > 0) {
         let statusSelect = $("#filterStatus");
-        let hasWorking = false;
-        let hasNotWorking = false;
-        data.forEach(function (status) {
-          if (status === true) {
-            statusSelect.append(new Option("Đang làm việc", 1));
-            hasWorking = true;
-          } else if (status === false) {
-            statusSelect.append(new Option("Nghỉ việc", 0));
-            hasNotWorking = true;
-          }
-        });
-        if (!hasWorking) {
-          $("#filterStatus option[value='1']").prop("disabled", true);
-        }
-        if (!hasNotWorking) {
-          $("#filterStatus option[value='0']").prop("disabled", true);
-        }
+        statusSelect.append(new Option("Đang làm việc", 1));
+        statusSelect.append(new Option("Nghỉ việc", 0));
       }
     },
   });
@@ -605,7 +590,7 @@ $(document).ready(function () {
     ],
   });
 
-  $("#filterButton").on("click", function () {
+  window.filterTable = function () {
     let gender = $("#filterGender").val();
     let position = $("#filterPosition").val();
     let status = $("#filterStatus").val();
@@ -627,7 +612,7 @@ $(document).ready(function () {
       .column(6)
       .search(province !== "all" ? province : "")
       .draw();
-  });
+  };
 });
 // Submit sửa thông tin sinh viên
 
@@ -887,4 +872,95 @@ $(document).ready(function () {
       },
     });
   }
+});
+
+// Thanh Phú Thống Nhân Viên Chưa Chấm Công
+$(document).ready(function () {
+  // Load danh sách phòng ban vào bộ lọc báo cáo
+  $.ajax({
+    type: "GET",
+    url: "/get_all_phong_ban",
+    success: function (data) {
+      if (data && data.length > 0) {
+        let departmentSelect = $("#reportDepartment");
+        data.forEach(function (department) {
+          departmentSelect.append(new Option(department, department));
+        });
+      }
+    },
+  });
+
+  // Load danh sách chức vụ vào bộ lọc báo cáo
+  $.ajax({
+    type: "GET",
+    url: "/get_all_chuc_vu",
+    success: function (data) {
+      if (data && data.length > 0) {
+        let positionSelect = $("#reportPosition");
+        data.forEach(function (position) {
+          positionSelect.append(new Option(position, position));
+        });
+      }
+    },
+  });
+
+  let dashboard_bangdsnv_kcc = $("#dashboard_bangdsnv_kcc").DataTable({
+    paging: true,
+    lengthChange: false,
+    searching: true,
+    pageLength: 20, // Giới hạn số lượng nhân viên hiển thị tối đa là 20
+    order: [[1, "asc"]], // Sắp xếp ID theo thứ tự tăng dần
+    info: true,
+    autoWidth: false,
+    responsive: true,
+    language: {
+      search: "Tìm Kiếm Nhanh:", // Thay đổi chữ "Search" thành "Tìm Kiếm Nhanh:"
+    },
+    ajax: {
+      type: "GET",
+      url: "/get_all_nhan_vien_khong_cham_cong",
+      dataSrc: "",
+    },
+    columns: [
+      {
+        data: null,
+        render: function (data, type, row, meta) {
+          return "<center>" + (meta.row + 1) + "</center>";
+        },
+      },
+      { data: "id" },
+      { data: "hoten" },
+      {
+        data: "gioitinh",
+        render: function (data, type, row) {
+          return data == 0 ? "Nữ" : "Nam";
+        },
+      },
+      { data: "dienthoai" },
+      { data: "email" },
+      { data: "diachi" },
+      { data: "tenvt" },
+      { data: "tenpb" },
+      { data: "trangthai" }, // Thêm cột Trạng thái
+    ],
+    rowCallback: function (row, data) {
+      $(row).css("color", "red");
+    },
+  });
+
+  window.filterReport = function () {
+    let department = $("#reportDepartment").val();
+    let position = $("#reportPosition").val();
+    let date = $("#reportDate").val();
+
+    let filter = {
+      department: department !== "all" ? department : "",
+      position: position !== "all" ? position : "",
+      date: date,
+    };
+
+    dashboard_bangdsnv_kcc.ajax
+      .url("/get_all_nhan_vien_khong_cham_cong?" + $.param(filter))
+      .load();
+  };
 });
