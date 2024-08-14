@@ -792,8 +792,16 @@ document.addEventListener("DOMContentLoaded", function () {
         {
           label: "Số Lượng",
           data: dataVaiTro,
-          backgroundColor: "rgba(54, 162, 235, 0.2)",
-          borderColor: "rgba(54, 162, 235, 1)",
+          backgroundColor: [
+            "rgba(255, 99, 132, 0.2)",
+            "rgba(54, 162, 235, 0.2)",
+            "rgba(75, 192, 192, 0.2)",
+          ],
+          borderColor: [
+            "rgba(255, 99, 132, 1)",
+            "rgba(54, 162, 235, 1)",
+            "rgba(75, 192, 192, 1)",
+          ],
           borderWidth: 1,
         },
       ],
@@ -805,9 +813,8 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         y: {
           beginAtZero: true,
-          max: 10, // Đặt giá trị tối đa của trục y là 3
           ticks: {
-            stepSize: 1, // Đặt khoảng cách giữa các giá trị trên trục y là 1
+            stepSize: 50, // Đặt khoảng cách giữa các giá trị trên trục y là 50
           },
         },
       },
