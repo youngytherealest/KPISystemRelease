@@ -783,6 +783,29 @@ document.addEventListener("DOMContentLoaded", function () {
   const labelsVaiTro = nhanVienTheoVaiTro.map((item) => item.role);
   const dataVaiTro = nhanVienTheoVaiTro.map((item) => item.count);
 
+  const colors = [
+    "rgba(54, 162, 235, 0.2)",
+    "rgba(75, 192, 192, 0.2)",
+    "rgba(255, 206, 86, 0.2)",
+    "rgba(153, 102, 255, 0.2)",
+    "rgba(255, 159, 64, 0.2)",
+  ];
+
+  const borderColors = [
+    "rgba(54, 162, 235, 1)",
+    "rgba(75, 192, 192, 1)",
+    "rgba(255, 206, 86, 1)",
+    "rgba(153, 102, 255, 1)",
+    "rgba(255, 159, 64, 1)",
+  ];
+
+  const backgroundColor = labelsVaiTro.map(
+    (_, index) => colors[index % colors.length]
+  );
+  const borderColor = labelsVaiTro.map(
+    (_, index) => borderColors[index % borderColors.length]
+  );
+
   const ctxRole = document.getElementById("role-chart-canvas").getContext("2d");
   new Chart(ctxRole, {
     type: "bar",
@@ -792,16 +815,8 @@ document.addEventListener("DOMContentLoaded", function () {
         {
           label: "Số Lượng",
           data: dataVaiTro,
-          backgroundColor: [
-            "rgba(255, 99, 132, 0.2)",
-            "rgba(54, 162, 235, 0.2)",
-            "rgba(75, 192, 192, 0.2)",
-          ],
-          borderColor: [
-            "rgba(255, 99, 132, 1)",
-            "rgba(54, 162, 235, 1)",
-            "rgba(75, 192, 192, 1)",
-          ],
+          backgroundColor: backgroundColor,
+          borderColor: borderColor,
           borderWidth: 1,
         },
       ],
@@ -813,8 +828,27 @@ document.addEventListener("DOMContentLoaded", function () {
         },
         y: {
           beginAtZero: true,
+          max: 1000, // Đặt giá trị tối đa của trục y là 1000
           ticks: {
-            stepSize: 50, // Đặt khoảng cách giữa các giá trị trên trục y là 50
+            stepSize: 10, // Đặt khoảng cách giữa các giá trị trên trục y là 1
+            callback: function (value) {
+              if (Number.isInteger(value)) {
+                return value; // Chỉ hiển thị số nguyên
+              }
+            },
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: "top",
+        },
+        tooltip: {
+          callbacks: {
+            label: function (tooltipItem) {
+              return `Số Lượng: ${tooltipItem.raw}`;
+            },
           },
         },
       },

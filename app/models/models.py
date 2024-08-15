@@ -268,36 +268,6 @@ def get_performance_by_department(month, year):
         return {"error": str(e)}
 
 
-# Biểu đồ thống kê Tỷ lệ chấm công
-def get_monthly_attendance_rate():
-    try:
-        result = []
-        for month in range(1, 13):
-            start_date = datetime.datetime(datetime.datetime.now().year, month, 1)
-            end_date = (start_date + timedelta(days=32)).replace(day=1) - timedelta(
-                days=1
-            )
-            total_employees = cursor.execute(
-                "SELECT COUNT(*) FROM usercty_spkt"
-            ).fetchone()[0]
-            attended_count = cursor.execute(
-                """
-                SELECT COUNT(DISTINCT idu) 
-                FROM chamcong_spkt 
-                WHERE ngaythang BETWEEN ? AND ?
-            """,
-                (start_date, end_date),
-            ).fetchone()[0]
-            attendance_rate = (
-                (attended_count / total_employees) * 100 if total_employees else 0
-            )
-            result.append({"month": month, "attendance_rate": attendance_rate})
-        return result
-    except Exception as e:
-        print("Error in get_monthly_attendance_rate: ", e)
-        return {"error": str(e)}
-
-
 def count_all_nhan_vien():
     try:
         conn = create_connection()

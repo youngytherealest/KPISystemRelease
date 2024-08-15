@@ -323,20 +323,6 @@ async def get_all_nhan_vien_route(token: str = Cookie(None)):
 
 
 # Tỷ Lệ Chấm Công
-@app.get("/get_monthly_attendance_rate")
-async def get_monthly_attendance_rate_route(token: str = Cookie(None)):
-    if token:
-        try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            permission = payload.get("permission")
-            if permission == "user":
-                result = get_monthly_attendance_rate_controller()
-                if "error" in result:
-                    return JSONResponse(status_code=500, content=result)
-                return JSONResponse(status_code=200, content=result)
-        except jwt.PyJWTError:
-            return RedirectResponse("/login")
-    return RedirectResponse("/login")
 
 
 # Nhân Viên Chưa Chấm Công

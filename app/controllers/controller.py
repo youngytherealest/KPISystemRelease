@@ -68,11 +68,6 @@ def get_all_nhan_vien_khong_cham_cong_controller(department, position, date):
     return get_all_nhan_vien_khong_cham_cong(department, position, date)
 
 
-# Tỉ Lệ Chấm Công
-def get_monthly_attendance_rate_controller():
-    return get_monthly_attendance_rate()
-
-
 # Biểu Đồ Hiệu Suất Chấm Công Theo Tháng
 def get_performance_by_department_controller(month, year):
     return get_performance_by_department(month, year)
