@@ -69,8 +69,13 @@ def get_all_nhan_vien_khong_cham_cong_controller(department, position, date):
 
 
 # Biểu Đồ Hiệu Suất Chấm Công Theo Tháng
-def get_performance_by_department_controller(month, year):
-    return get_performance_by_department(month, year)
+def get_performance_by_department_controller():
+    return get_performance_by_department()
+
+
+# Biểu đồ đi trễ về sớm
+def get_attendance_rates_by_month_controller():
+    return get_attendance_rates_by_month()
 
 
 def count_all_sinh_vien_controller():

@@ -128,6 +128,8 @@
               </script>
 
               <!-- Biểu đồ phân tích hiệu suất làm việc theo phòng ban  -->
+              <!-- Biểu đồ phân tích hiệu suất làm việc theo phòng ban  -->
+              <!-- Biểu đồ phân tích hiệu suất làm việc theo phòng ban  -->
               <section class="col-lg-6 connectedSortable">
                 <!-- Custom tabs (Charts with tabs)-->
                 <div class="card">
@@ -147,21 +149,40 @@
                   </div>
                   <!-- /.card-header -->
                   <div class="card-body">
-                    <div class="row mb-3">
-                      <div class="col-md-6">
-                        <label for="filterMonthYear">Tháng/Năm</label>
-                        <input
-                          type="month"
-                          class="form-control"
-                          id="filterMonthYear"
-                          onchange="loadPerformanceChart()"
-                        />
-                      </div>
-                    </div>
                     <div class="tab-content p-0">
                       <div class="chart tab-pane active" id="performance-chart">
                         <canvas
                           id="performance-chart-canvas"
+                          style="height: 250px; width: 100%"
+                        ></canvas>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+              </section>
+
+              <!-- Biểu đồ đi trễ về sớm theo tháng  -->
+
+              <section class="col-lg-6 connectedSortable">
+                <!-- Custom tabs (Charts with tabs)-->
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">
+                      <i class="fa-solid fa-chart-line"></i>
+                      Tỷ lệ đi trễ, về sớm, đúng giờ và nghỉ theo tháng
+                    </h3>
+                  </div>
+                  <!-- /.card-header -->
+                  <div class="card-body">
+                    <div class="tab-content p-0">
+                      <div
+                        class="chart tab-pane active"
+                        id="attendance-rates-chart"
+                      >
+                        <canvas
+                          id="attendance-rates-chart-canvas"
                           style="height: 250px; width: 100%"
                         ></canvas>
                       </div>
@@ -181,6 +202,14 @@
                       <i class="fa-solid fa-list-ol"></i>
                       Báo cáo chi tiết nhân viên chưa chấm công trong ngày
                     </h3>
+                    <div align="right">
+                      <small
+                        ><em
+                          >Hiển thị cảnh báo nhân viên chưa thực hiện chấm công
+                          trong ngày</em
+                        ></small
+                      >
+                    </div>
                   </div>
                   <div class="card-body">
                     <div class="row mb-3">

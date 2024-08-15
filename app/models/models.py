@@ -196,7 +196,7 @@ def get_all_nhan_vien_khong_cham_cong(department, position, date):
                 SELECT cc.idu
                 FROM chamcong_spkt cc
                 WHERE cc.ngaythang = ?
-                AND cc.giovao <= '07:30:00'
+                
             )
         """
 
@@ -239,29 +239,68 @@ def get_all_nhan_vien_khong_cham_cong(department, position, date):
 
 
 # Biểu đồ hiệu suất làm việc theo tháng của phòng ban
-def get_performance_by_department(month, year):
+def get_performance_by_department():
     try:
         query = """
-            SELECT pb.tenpb AS department, SUM(DATEDIFF(MINUTE, cc.giovao, cc.giora)/60.0) AS hours
+            SELECT pb.tenpb AS department, 
+                   MONTH(cc.ngaythang) AS month, 
+                   SUM(DATEDIFF(MINUTE, cc.giovao, cc.giora)/60.0) AS hours
             FROM chamcong_spkt cc
             JOIN usercty_spkt u ON cc.idu = u.id
             JOIN phongban_spkt pb ON u.idpb = pb.idpb
-            WHERE 1=1
+            GROUP BY pb.tenpb, MONTH(cc.ngaythang)
+            ORDER BY pb.tenpb, MONTH(cc.ngaythang)
         """
-        params = []
+        result = cursor.execute(query).fetchall()
+        data = {}
+        for row in result:
+            department = row[0]
+            month = row[1]
+            hours = row[2]
+            if department not in data:
+                data[department] = [0] * 12
+            data[department][month - 1] = hours
+        return data
 
-        if month:
-            query += " AND MONTH(cc.ngaythang) = ?"
-            params.append(month)
+    except Exception as e:
+        print("Error: ", e)
+        return {"error": str(e)}
 
-        if year:
-            query += " AND YEAR(cc.ngaythang) = ?"
-            params.append(year)
 
-        query += " GROUP BY pb.tenpb"
-
-        result = cursor.execute(query, params).fetchall()
-        return [{"department": i[0], "hours": i[1]} for i in result]
+# Biểu đồ tỉ lệ đi trễ về sớm
+def get_attendance_rates_by_month():
+    try:
+        query = """
+            WITH MonthlyAttendance AS (
+                SELECT 
+                    MONTH(cc.ngaythang) AS month, 
+                    COUNT(*) AS total_records,
+                    SUM(CASE WHEN DATEDIFF(MINUTE, cl.tg_bd, cc.giovao) > 0 THEN 1 ELSE 0 END) AS late_count,
+                    SUM(CASE WHEN DATEDIFF(MINUTE, cc.giora, cl.tg_kt) < 0 THEN 1 ELSE 0 END) AS early_leave_count,
+                    SUM(CASE WHEN DATEDIFF(MINUTE, cl.tg_bd, cc.giovao) = 0 AND DATEDIFF(MINUTE, cc.giora, cl.tg_kt) = 0 THEN 1 ELSE 0 END) AS on_time_count
+                FROM chamcong_spkt cc
+                JOIN ca_lam_spkt cl ON cc.idcc = cl.idclv
+                GROUP BY MONTH(cc.ngaythang)
+            )
+            SELECT 
+                month,
+                CAST(late_count * 100.0 / total_records AS FLOAT) AS late_rate,
+                CAST(early_leave_count * 100.0 / total_records AS FLOAT) AS early_leave_rate,
+                CAST(on_time_count * 100.0 / total_records AS FLOAT) AS on_time_rate,
+                CAST((SELECT COUNT(*) FROM usercty_spkt u WHERE u.id NOT IN (SELECT idu FROM chamcong_spkt WHERE MONTH(ngaythang) = ma.month AND YEAR(ngaythang) = YEAR(GETDATE()))) * 100.0 / (SELECT COUNT(*) FROM usercty_spkt) AS FLOAT) AS absent_rate
+            FROM MonthlyAttendance ma
+            ORDER BY month
+        """
+        result = cursor.execute(query).fetchall()
+        data = {
+            "months": [row[0] for row in result],
+            "late_rate": [float(row[1]) for row in result],
+            "early_leave_rate": [float(row[2]) for row in result],
+            "on_time_rate": [float(row[3]) for row in result],
+            "absent_rate": [float(row[4]) for row in result],
+        }
+        print(data)  # Kiểm tra dữ liệu trả về
+        return data
 
     except Exception as e:
         print("Error: ", e)

@@ -1008,65 +1008,81 @@ $(document).ready(function () {
 
 // Thanh Phú biểu đồ hiệu suất
 function loadPerformanceChart() {
-  let monthYear = $("#filterMonthYear").val();
-  let month = "";
-  let year = "";
-
-  if (monthYear) {
-    [year, month] = monthYear.split("-");
-  }
-
-  let filter = {
-    month: month,
-    year: year,
-  };
-
   $.ajax({
     type: "GET",
     url: "/get_performance_by_department",
-    data: filter,
     success: function (response) {
-      let departments = [];
-      let hours = [];
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      const datasets = [];
 
-      $.each(response, function (idx, val) {
-        departments.push(val["department"]);
-        hours.push(val["hours"]);
+      Object.keys(response).forEach((department, index) => {
+        datasets.push({
+          label: department,
+          data: response[department],
+          fill: false,
+          borderColor: [
+            "rgba(255, 99, 132, 1)",
+            "rgba(255, 159, 64, 1)",
+            "rgba(255, 205, 86, 1)",
+            "rgba(75, 192, 192, 1)",
+            "rgba(54, 162, 235, 1)",
+            "rgba(153, 102, 255, 1)",
+            "rgba(201, 203, 207, 1)",
+          ][index % 7],
+          tension: 0.1,
+        });
       });
 
-      var performanceChart = document
+      const ctx = document
         .getElementById("performance-chart-canvas")
         .getContext("2d");
-      var myPerformanceChart = new Chart(performanceChart, {
-        type: "bar",
+      new Chart(ctx, {
+        type: "line",
         data: {
-          labels: departments,
-          datasets: [
-            {
-              data: hours,
-              borderWidth: 1,
-              backgroundColor: [
-                "rgba(255, 99, 132, 0.8)",
-                "rgba(255, 159, 64, 0.8)",
-                "rgba(255, 205, 86, 0.8)",
-                "rgba(75, 192, 192, 0.8)",
-                "rgba(54, 162, 235, 0.8)",
-                "rgba(153, 102, 255, 0.8)",
-                "rgba(201, 203, 207, 0.8)",
-              ],
-            },
-          ],
-          hoverOffset: 1,
+          labels: months,
+          datasets: datasets,
         },
         options: {
-          indexAxis: "y",
           responsive: true,
           plugins: {
-            legend: false,
+            legend: {
+              display: true,
+              position: "top",
+            },
+            tooltip: {
+              callbacks: {
+                label: function (tooltipItem) {
+                  return `Số giờ: ${tooltipItem.raw}`;
+                },
+              },
+            },
           },
           scales: {
             x: {
               beginAtZero: true,
+            },
+            y: {
+              beginAtZero: true,
+              max: 100, // Tùy chỉnh giá trị tối đa của trục y nếu cần thiết
+              ticks: {
+                stepSize: 10, // Tùy chỉnh khoảng cách giữa các giá trị trên trục y
+                callback: function (value) {
+                  return Number.isInteger(value) ? value : null; // Chỉ hiển thị số nguyên
+                },
+              },
             },
           },
         },
@@ -1077,4 +1093,122 @@ function loadPerformanceChart() {
 
 $(document).ready(function () {
   loadPerformanceChart(); // Load chart on page load
+});
+
+/// Thanh Phú Biểu đồ đi trễ về sớm theo tháng
+function loadAttendanceRatesChart() {
+  $.ajax({
+    type: "GET",
+    url: "/get_attendance_rates_by_month",
+    success: function (response) {
+      console.log(response); // Kiểm tra dữ liệu nhận được
+
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      const allMonths = Array.from({ length: 12 }, (_, i) => i + 1);
+
+      const data = {
+        late_rate: Array(12).fill(0),
+        early_leave_rate: Array(12).fill(0),
+        on_time_rate: Array(12).fill(0),
+        absent_rate: Array(12).fill(0),
+      };
+
+      response.months.forEach((month, index) => {
+        const monthIndex = month - 1;
+        data.late_rate[monthIndex] = response.late_rate[index];
+        data.early_leave_rate[monthIndex] = response.early_leave_rate[index];
+        data.on_time_rate[monthIndex] = response.on_time_rate[index];
+        data.absent_rate[monthIndex] = response.absent_rate[index];
+      });
+
+      const ctx = document
+        .getElementById("attendance-rates-chart-canvas")
+        .getContext("2d");
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: months,
+          datasets: [
+            {
+              label: "Đi trễ",
+              data: data.late_rate,
+              borderColor: "rgba(255, 99, 132, 1)",
+              backgroundColor: "rgba(255, 99, 132, 0.2)",
+              fill: false,
+            },
+            {
+              label: "Về sớm",
+              data: data.early_leave_rate,
+              borderColor: "rgba(255, 159, 64, 1)",
+              backgroundColor: "rgba(255, 159, 64, 0.2)",
+              fill: false,
+            },
+            {
+              label: "Đúng giờ",
+              data: data.on_time_rate,
+              borderColor: "rgba(75, 192, 192, 1)",
+              backgroundColor: "rgba(75, 192, 192, 0.2)",
+              fill: false,
+            },
+            {
+              label: "Nghỉ",
+              data: data.absent_rate,
+              borderColor: "rgba(54, 162, 235, 1)",
+              backgroundColor: "rgba(54, 162, 235, 0.2)",
+              fill: false,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: true,
+              position: "top",
+            },
+            tooltip: {
+              callbacks: {
+                label: function (tooltipItem) {
+                  return `Tỷ lệ: ${tooltipItem.raw}%`;
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+            },
+            y: {
+              beginAtZero: true,
+              max: 100, // Giá trị tối đa của trục y là 100%
+              ticks: {
+                stepSize: 10, // Khoảng cách giữa các giá trị trên trục y
+                callback: function (value) {
+                  return value + "%"; // Thêm ký hiệu % vào các giá trị
+                },
+              },
+            },
+          },
+        },
+      });
+    },
+  });
+}
+
+$(document).ready(function () {
+  loadPerformanceChart(); // Load performance chart on page load
+  loadAttendanceRatesChart(); // Load attendance rates chart on page load
 });

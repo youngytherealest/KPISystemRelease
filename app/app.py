@@ -346,15 +346,27 @@ async def get_all_nhan_vien_khong_cham_cong_route(
 
 # Biểu đồ tỷ lệ chấm công theo tháng
 @app.get("/get_performance_by_department")
-async def get_performance_by_department_route(
-    token: str = Cookie(None), month: str = "", year: str = ""
-):
+async def get_performance_by_department_route(token: str = Cookie(None)):
     if token:
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             permission = payload.get("permission")
             if permission == "user":
-                return get_performance_by_department_controller(month, year)
+                return get_performance_by_department_controller()
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
+
+
+# Biểu đồ đi trễ về sớm
+@app.get("/get_attendance_rates_by_month")
+async def get_attendance_rates_by_month_route(token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                return get_attendance_rates_by_month_controller()
         except jwt.PyJWTError:
             return RedirectResponse("/login")
     return RedirectResponse("/login")
