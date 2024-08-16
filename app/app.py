@@ -156,7 +156,7 @@ async def catch_404(request, call_next):
 
 @app.post("/token", response_model=Token)
 async def login_for_access_token(credentials: UserCredentials):
-    result = verify_user_route(credentials)
+    result = verify_user_route_spkt(credentials) #Duc_Sua_7/8:159 old: verify_user_route
     if result['isVerified']:
         access_token_expires = datetime.timedelta(
             minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -194,13 +194,13 @@ async def home(request: Request, token: str = Cookie(None)):
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             permission = payload.get("permission")
-            if permission == "user":
+            if permission == "quanly" or permission == "truongphong": #Duc_Sua_7/8:197 old: user
                 tong_sinh_vien: int = count_all_sinh_vien_controller()
                 ti_le_da_danh_gia: float = ti_le_sinh_vien_da_danh_gia_controller()
                 so_luong_ket_qua: int = so_luong_sinh_vien_dat_ket_qua_controller()
                 return templates.TemplateResponse('index.html', context={'request': request, 'dashboard_tongsinhvien': tong_sinh_vien, 'dashboard_tiledadanhgia': ti_le_da_danh_gia, 'dashboard_soluongdat': so_luong_ket_qua['dat'], 'dashboard_soluongkhongdat': so_luong_ket_qua['khong_co_nhom']})
             else:
-                return RedirectResponse('/sinhvien')
+                return RedirectResponse('/nhanvien') #Duc_Sua_7/8:203 old: sinhvien
         except jwt.PyJWTError:
             return RedirectResponse('/login')
     return RedirectResponse('/login')
@@ -1552,16 +1552,18 @@ async def gui_mail_otp(email: str):
         return JSONResponse(status_code=500, content={'status': 'Email system has problem'})
 
 
-@app.get('/sinhvien')
+@app.get('/nhanvien') #Duc_Sua_7/8:1555 old: sinhvien
 async def sv_index(request: Request, token: str = Cookie(None)):
     if token:
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             username = payload.get("sub")
+            id = payload.get("id")
             if username:
                 response = templates.TemplateResponse(
-                    'sv_index.html', context={'request': request})
+                    'nv_index.html', context={'request': request})
                 response.set_cookie("email", username, httponly=False)
+                response.set_cookie("id", id, httponly=False)
                 return response
             else:
                 return RedirectResponse('/login')
@@ -1591,6 +1593,10 @@ async def sv_danhgiakythuctap(request: Request, token: str = Cookie(None)):
 async def xem_thong_tin_sv_route(username: str):
     return JSONResponse(status_code=200, content=xem_thong_tin_sv_controller(email=username))
 
+# HPDuc6/8
+@app.get('/xem_thong_tin_nv_spkt')
+async def xem_thong_tin_nv_route(idu: int):
+    return JSONResponse(status_code=200, content=xem_thong_tin_nv_spkt_controller(idu=idu))
 
 @app.post('/them_chi_tiet_cong_viec')
 async def them_chi_tiet_cong_viec_route(data: ChiTietCongViec = Body(...), token: str = Cookie(None)):
@@ -1805,6 +1811,20 @@ async def congviecsinhvien(request: Request, token: str = Cookie(None)):
             permission = payload.get("permission")
             if permission == "student":
                 return templates.TemplateResponse('sv_tasks.html', context={'request': request})
+
+        except jwt.PyJWTError:
+            return RedirectResponse('/login')
+    return RedirectResponse('/login')
+
+# DT 9/8:1819
+@app.get('/dschamcongvatamluong')
+async def dschamcongvatamluong(request: Request, token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "nhanvien":
+                return templates.TemplateResponse('nv_chc_tl.html', context={'request': request})
 
         except jwt.PyJWTError:
             return RedirectResponse('/login')
@@ -2112,6 +2132,18 @@ async def doi_mat_Khau(request: Request, token: str = Cookie(None)):
             return RedirectResponse('/login')
     return RedirectResponse('/login')
 
+# DT_8/8:2121
+@app.get('/doimatkhau_nv')
+async def doi_mat_Khau(request: Request, token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "nhanvien":
+                return templates.TemplateResponse('nv_change_password.html', context={'request': request})
+        except jwt.PyJWTError:
+            return RedirectResponse('/login')
+    return RedirectResponse('/login')
 
 @app.post('/update_password_sv')
 async def update_password_sv_route(old_password: str, new_password: str, token: str = Cookie(None)):
@@ -2126,6 +2158,28 @@ async def update_password_sv_route(old_password: str, new_password: str, token: 
                 if result == 1:
                     return JSONResponse(status_code=200, content={'status': 'OK'})
                 else:
+                    return JSONResponse(status_code=200, content={'status': 'NOT_MODIFY'})
+        except jwt.PyJWTError:
+            return RedirectResponse('/login')
+    return RedirectResponse('/login')
+
+# DT_8/8:2121
+@app.post('/update_password_nv')
+async def update_password_nv_route(old_password: str, new_password: str, token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            id = payload.get("id") # Lấy id
+            # username = payload.get("sub")
+            if permission == "nhanvien":
+                result = update_password_nv_controller(id, sha3_256(bytes(
+                    old_password, 'utf-8')).hexdigest(), sha3_256(bytes(new_password, 'utf-8')).hexdigest())
+                if result == 1:
+                    
+                    return JSONResponse(status_code=200, content={'status': 'OK'})
+                else:
+                    print(result)
                     return JSONResponse(status_code=200, content={'status': 'NOT_MODIFY'})
         except jwt.PyJWTError:
             return RedirectResponse('/login')
@@ -2977,6 +3031,18 @@ def verify_user_route(credentials: UserCredentials):
         if id:
             return {"isVerified": True, "permission": "user", "id": int(id)}
 
+# Duc_7/8:2984
+def verify_user_route_spkt(credentials: UserCredentials):
+    id = verify_users_spkt_controller(tk=credentials.username, password=sha3_256(
+        bytes(credentials.password, 'utf-8')).hexdigest())
+    idvt =verify_vt_user_spkt_controller(id)
+    
+    if idvt==1:
+        return {"isVerified": True, "permission": "quanly", "id": int(id)}
+    elif idvt==2:
+        return {"isVerified": True, "permission": "truongphong", "id": int(id)}
+    elif idvt==3:
+        return {"isVerified": True, "permission": "nhanvien", "id": int(id)}
 
 # update from row 205
 @app.get('/login')
@@ -2985,10 +3051,12 @@ async def login(request: Request, token: str = Cookie(None)):
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             permission = payload.get("permission")
-            if permission == "student":
-                return RedirectResponse(url='/sinhvien')
-            elif permission == "user":
+            if permission == "nhanvien": #Duc_Sua_7/8:3003 old: student
+                return RedirectResponse(url='/nhanvien') #Duc_Sua_7/8:3004 old: sinhvien
+            elif permission == "quanly": #Duc_Sua_7/8:3005 old: user
                 return RedirectResponse('/')
+            elif permission == "truongphong": #Duc_Sua_7/8:3007 old: user
+                return RedirectResponse('/') #luu y khi dang nhap bang tai khoan tp se vao trang quan ly
         except jwt.PyJWTError:
             return templates.TemplateResponse('login.html', context={'request': request})
     else:
@@ -3010,6 +3078,84 @@ async def get_ds_chuc_nang_by_user_id_route(token: str = Cookie(None)):
                     return await logout()
             else:
                 return JSONResponse(status_code=200, content={'status': 'Không lấy được id từ token'})
+        except jwt.PyJWTError:
+            return RedirectResponse('/login')
+    return RedirectResponse('/login')
+
+# Lấy năm chấm công 9/8:3085
+@app.get('/lay_nam_chc_spkt')
+async def lay_nam_chc_spkt_route(token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            idu = payload.get("id")
+            if id is not None:
+                return JSONResponse(status_code=200, content=lay_nam_chc_spkt_controller(idu=idu))
+        except jwt.PyJWTError:
+            return RedirectResponse('/login')
+    return RedirectResponse('/login')
+    
+
+# Lấy tháng chấm công theo năm 9/8:3099
+@app.get('/lay_thang_chc_spkt')
+async def lay_thang_chc_spkt_route(nam: int,token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            idu = payload.get("id")
+            if id is not None:
+                
+                return JSONResponse(status_code=200, content=lay_thang_chc_spkt_controller(idu=idu, nam=nam))
+        except jwt.PyJWTError:
+            return RedirectResponse('/login')
+    return RedirectResponse('/login')
+
+@app.get('/load_ct_chc_u_spkt')
+async def load_ct_chc_u_spkt_route(thang: int,nam: int, mode:int =0, token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            idu = payload.get("id")
+            if id is not None:
+                return JSONResponse(status_code=200, content=load_ct_chc_u_spkt_controller(idu=idu, thang=thang, nam=nam, mode=mode))
+        except jwt.PyJWTError:
+            return RedirectResponse('/login')
+    return RedirectResponse('/login')
+
+@app.get('/lay_nam_bl_spkt')
+async def lay_nam_bl_spkt_route(token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            idu = payload.get("id")
+            if id is not None:
+                return JSONResponse(status_code=200, content=lay_nam_bl_spkt_controller(idu=idu))
+        except jwt.PyJWTError:
+            return RedirectResponse('/login')
+    return RedirectResponse('/login')
+    
+
+# Lấy tháng chấm công theo năm 9/8:3099
+@app.get('/lay_thang_bl_spkt')
+async def lay_thang_bl_spkt_route(nam: int,token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            idu = payload.get("id")
+            if id is not None:
+                return JSONResponse(status_code=200, content=lay_thang_bl_spkt_controller(idu=idu, nam=nam))
+        except jwt.PyJWTError:
+            return RedirectResponse('/login')
+    return RedirectResponse('/login')
+
+@app.get('/load_ct_bl_u_spkt')
+async def load_ct_bl_u_spkt_route(thang: int,nam: int,  token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            idu = payload.get("id")
+            if id is not None:
+                return JSONResponse(status_code=200, content=load_ct_bl_u_spkt_controller(idu=idu, thang=thang, nam=nam))
         except jwt.PyJWTError:
             return RedirectResponse('/login')
     return RedirectResponse('/login')

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {% include 'header.html' ignore missing %}
+  <title>DANH SÁCH CÔNG VIỆC | HTQL SVTT</title>
+  <style>
+    /* CSS để ẩn cột 'luuy' */
+    .hide-column {
+      display: none;
+    }
+
+    /* CSS để thay đổi màu cả dòng nếu 'luuy' là 1 */
+    .luuy-1 {
+      background-color: #f19c9c !important;
+    }
+
+    .luuy-2 {
+      background-color: #a6f19c !important;
+    }
+  </style>
+</head>
+
+<body class="hold-transition sidebar-mini">
+  <div class="wrapper">
+    {% include 'navbar.html' ignore missing %}
+
+    <!-- SIDEBAR -->
+    <!-- Main Sidebar Container -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+      <!-- Brand Logo -->
+      <a href="/" class="brand-link">
+        <img src="{{ url_for('dist', path='/img/kpi.png') }}" alt="Logo" class="brand-image" />
+        <span class="brand-text font-weight-light">HTQL SVTT</span>
+      </a>
+
+      <!-- Sidebar -->
+      <div class="sidebar " id="sidebar">
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+            <!-- Add icons to the links using the .nav-icon class
+                 with font-awesome or any other icon font library -->
+            <li class="nav-item">
+              <a href="/" class="nav-link" id="dashboard_home">
+                <i class="fa-solid fa-user"></i>
+                <p>
+                  Nhân viên
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/dschamcongvatamluong" class="nav-link" id="dashboard_home">
+                <i class="fa-solid fa-business-time"></i>
+                <p>
+                  Danh sách chấm công và tạm lương
+                </p>
+              </a>
+            </li>
+<!-- DX:60:sv_index.html-->  
+            <li class="nav-item">
+              <a href="/doimatkhau_nv" class="nav-link" id="dashboard_home">
+                <i class="fa-solid fa-unlock-keyhole"></i>
+                <p>
+                  Đổi mật khẩu
+                </p>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <!-- /.sidebar-menu -->
+      </div>
+      <!-- /.sidebar -->
+    </aside>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper ">
+      <!-- Content Header (Page header) -->
+      <section class="content-header">
+        <div class="container-fluid">
+          <div class="row mb-2">
+            <div class="col-sm-6 h4">
+              <h1>Danh sách chấm công và tạm lương</h1>
+            </div>
+            <div class="col-sm-6 h4">
+              <ol class="breadcrumb float-sm-right">
+                <li class="breadcrumb-item"><a href="#">Home</a></li>
+                <li class="breadcrumb-item active">Danh sách chấm công và tạm lương</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+        <!-- /.container-fluid -->
+      </section>
+
+      <!-- Main content -->
+      <section class="col-lg-12 connectedSortable">
+        <!-- Map card -->
+        <div class="card">
+          <!-- <div class="card-header border-0 rows">
+            <h3 class="card-title col-lg-2">
+              <i class="fa-solid fa-list-ol "></i>
+              Danh sách chấm công và Tạm lương
+            </h3>
+          </div> -->
+          <div class="card-body">
+<!-- DT_9/8:106 -->
+            <ul class="nav nav-tabs h4" id="myTab" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="dschc-tab" data-toggle="tab" data-target="#dschc" type="button"
+                  role="tab" aria-controls="dschc" aria-selected="true">
+                  Danh sách chấm công
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="btl-tab" data-toggle="tab" data-target="#btl" type="button"
+                  role="tab" aria-controls="btl" aria-selected="false">
+                  Bảng tạm lương
+                </button>
+              </li>
+            </ul>
+            <div id="loctg" class="text-right">
+              <div id="tg_contain" class="d-flex justify-content-end sticky-top display mt-2">
+                  
+              </div>
+            </div>
+            <!-- <div class="row"> -->
+<!-- DX_9/8:107 -->
+<!-- CS_9/8:115-119  -->
+              
+              <div class="tab-content h4" id="myTabContent">
+                <div class="tab-pane fade show active mt-4" id="dschc" role="tabpanel" aria-labelledby="home-tab">
+                  <div id="loctt" class="d-flex justify-content-end sticky-top display">
+                    <div id="tt_contain" class="d-flex justify-content-end">
+                      
+                    </div>
+                  </div>
+                  <table class="table table-bordered table-hover sticky-top display table-striped" id="bangchamcong" hidden>
+                    <tbody></tbody>
+                  </table>
+                  
+                </div>
+                <div class="tab-pane fade show active mt-4" id="btl" role="tabpanel" aria-labelledby="home-tab">
+                  <table class="table table-bordered table-hover sticky-top display" id="bangtamluong" >
+                    <tbody></tbody>
+                  </table>
+                  <div id="btn_bl">
+
+                  </div>
+                </div>
+              </div>
+<!-- CS_9/8:115-119  -->
+            <!-- </div> -->
+          </div>
+        </div>
+
+
+        <!-- /.card -->
+      </section>
+      <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+    {% include 'footer.html' ignore missing %} {% include 'modal.html' ignore
+    missing %}
+
+    <!-- Control Sidebar -->
+    <aside class="control-sidebar control-sidebar-dark">
+      <!-- Control sidebar content goes here -->
+    </aside>
+    <!-- /.control-sidebar -->
+  </div>
+  <!-- jQuery -->
+  <script src="plugins/jquery/jquery.min.js"></script>
+  <!-- jQuery UI 1.11.4 -->
+  <script src="plugins/jquery-ui/jquery-ui.min.js"></script>
+  <!-- InputMask -->
+  <script src="plugins/moment/moment.min.js"></script>
+  <script src="plugins/inputmask/jquery.inputmask.min.js"></script>
+  <script src="plugins/daterangepicker/daterangepicker.js"></script>
+  <!-- Bootstrap 4 -->
+  <script src="../../plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- AdminLTE App -->
+  <script src="../../dist/js/adminlte.min.js"></script>
+  <!-- AdminLTE for demo purposes -->
+  <script src="../../dist/js/demo.js"></script>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- DataTables -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"
+    integrity="sha512-BkpSL20WETFylMrcirBahHfSnY++H2O1W+UnEEO4yNIl+jI2+zowyoGJpbtk6bx97fBXf++WJHSSK2MV4ghPcg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/dataTables.bootstrap4.min.js"
+    integrity="sha512-OQlawZneA7zzfI6B1n1tjUuo3C5mtYuAWpQdg+iI9mkDoo7iFzTqnQHf+K5ThOWNJ9AbXL4+ZDwH7ykySPQc+A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap4.min.css"
+    integrity="sha512-PT0RvABaDhDQugEbpNMwgYBCnGCiTZMh9yOzUsJHDgl/dMhD9yjHAwoumnUk3JydV3QTcIkNDuN40CJxik5+WQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- SELECT2 -->
+  <link href="plugins/select2/css/select2.css" rel="stylesheet" />
+  <script src="plugins/select2/js/select2.js"></script>
+  <!-- AdminLTE for demo purposes -->
+  <script src="dist/js/demo.js"></script>
+  <!-- File excel -->
+  <!-- use xlsx.full.min.js from version 0.20.3 -->
+  <script lang="javascript" src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+   <!-- chức năng trnag -->
+  <script src="dist/js/pages/nv_chc_tl.js"></script>
+</body>
+
+</html>

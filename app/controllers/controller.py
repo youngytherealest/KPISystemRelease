@@ -148,6 +148,13 @@ def verify_user_controller(username: str, password: str):
 def verify_student_controller(email: str, password: str):
     return verify_student(email, password)
 
+# Duc_7/8:151
+def verify_users_spkt_controller(tk: str, password: str):
+    return verify_users_spkt(tk, password)
+
+def verify_vt_user_spkt_controller(idu: int):
+    return verify_vt_user_spkt(idu)
+# Duc_7/8:151
 
 def get_ds_sinh_vien_by_username_controller(username: str, kythuctap: str, nhomhuongdan: str):
     return get_ds_sinh_vien_by_username(username, kythuctap, nhomhuongdan)
@@ -272,6 +279,9 @@ def kiem_tra_loai_tai_khoan_controller(username: str):
 def xem_thong_tin_sv_controller(email: str):
     return xem_thong_tin_sv(email)
 
+# HPDuc6/8
+def xem_thong_tin_nv_spkt_controller(idu: int):
+    return xem_thong_tin_nv_spkt(idu)
 
 def them_chi_tiet_cong_viec_controller(id_congviec: int, id_sinhvien: int, trangthai: int, ghichu: str):
     return them_chi_tiet_cong_viec(id_congviec, id_sinhvien, trangthai, ghichu)
@@ -332,6 +342,9 @@ def update_password_controller(username: str, old_password: str, new_password: s
 def update_password_sv_controller(email: str, old_password: str, new_password: str):
     return update_password_sv(email, old_password, new_password)
 
+# DT_8/8:345
+def update_password_nv_controller(id: int, old_password: str, new_password: str):
+    return update_password_nv(id, old_password, new_password)
 
 def get_phan_quyen_controller(username: str):
     return get_phan_quyen(username)
@@ -604,3 +617,22 @@ def get_chi_tiet_bieu_mau_by_id_controller(id: int):
 
 def xoa_bieu_mau_by_id_controller(id: int):
     return xoa_bieu_mau_by_id(id)
+
+# HPDuc9/8:621 Lấy năm chấm công 
+def lay_nam_chc_spkt_controller(idu: int):
+    return lay_nam_chc_spkt(idu)
+# Lấy tháng chấm công theo năm 9/8:3099
+def lay_thang_chc_spkt_controller(idu: int, nam: int):
+    return lay_thang_chc_spkt(idu, nam)
+
+def load_ct_chc_u_spkt_controller (idu: int, thang: int, nam: int, mode: int):
+    return load_ct_chc_u_spkt(idu, thang,  nam, mode)
+
+def lay_nam_bl_spkt_controller(idu: int):
+    return lay_nam_bl_spkt(idu)
+# Lấy tháng chấm công theo năm 9/8:3099
+def lay_thang_bl_spkt_controller(idu: int, nam: int):
+    return lay_thang_bl_spkt(idu, nam)
+
+def load_ct_bl_u_spkt_controller(idu: int, thang:int,nam: int):
+    return load_ct_bl_u_spkt(idu, thang ,nam)

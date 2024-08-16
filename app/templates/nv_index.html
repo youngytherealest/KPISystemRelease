@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  {% include 'header.html' ignore missing %}
+  <title>SINH VIÊN | HTQL SVTT</title>
+  <style>
+    /* CSS để ẩn cột 'luuy' */
+    .hide-column {
+      display: none;
+    }
+
+    /* CSS để thay đổi màu cả dòng nếu 'luuy' là 1 */
+    .luuy-1 {
+      background-color: #f19c9c !important;
+    }
+
+    .luuy-2 {
+      background-color: #a6f19c !important;
+    }
+  </style>
+</head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+  <div class="wrapper">
+    {% include 'navbar.html' ignore missing %}
+
+    <!-- SIDEBAR -->
+    <!-- Main Sidebar Container -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+      <!-- Brand Logo -->
+      <a href="/" class="brand-link">
+        <img src="{{ url_for('dist', path='/img/kpi.png') }}" alt="Logo" class="brand-image" />
+        <span class="brand-text font-weight-light">HTQL SVTT</span>
+      </a>
+
+      <!-- Sidebar -->
+      <div class="sidebar" id="sidebar">
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+            <!-- Add icons to the links using the .nav-icon class
+                 with font-awesome or any other icon font library -->
+            <li class="nav-item">
+              <a href="/" class="nav-link" id="dashboard_home">
+                <i class="fa-solid fa-user"></i>
+                <p>
+                  Nhân viên
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/dschamcongvatamluong" class="nav-link" id="dashboard_home">
+                <i class="fa-solid fa-business-time"></i>
+                <p>
+                  Danh sách chấm công và tạm lương
+                </p>
+              </a>
+            </li>
+<!-- DX:60:sv_index.html-->  
+            <li class="nav-item">
+              <a href="/doimatkhau_nv" class="nav-link" id="dashboard_home">
+                <i class="fa-solid fa-unlock-keyhole"></i>
+                <p>
+                  Đổi mật khẩu
+                </p>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <!-- /.sidebar-menu -->
+      </div>
+      <!-- /.sidebar -->
+    </aside>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+      <!-- Content Header (Page header) -->
+      <div class="content-header">
+        <div class="container-fluid">
+          <div class="row mb-2">
+            <div class="col-sm-6">
+              <h1 class="m-0">Trang dành cho nhân viên</h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+              <ol class="breadcrumb float-sm-right h4">
+                <li class="breadcrumb-item"><a href="#">Home</a></li>
+                <li class="breadcrumb-item active">Trang dành cho nhân viên</li>
+              </ol>
+            </div><!-- /.col -->
+          </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+      </div>
+      <!-- /.content-header -->
+
+      <!-- Main content -->
+      <section class="content">
+        <div class="container-fluid">
+          <!-- Main row -->
+          <div class="row">
+            <!-- right col (We are only adding the ID to make the widgets sortable)-->
+            <div class="col-lg-2"></div>
+            <section class="col-lg-8 connectedSortable">
+              <!-- Map card -->
+              <div class="card h4">
+                <div class="card-header border-0">Thông tin nhân viên</div>
+                <div class="card-body">
+ <!-- DX:107_6/8:sv_index.html-->                 
+                  <div class="tab-content " id="myTabContent">
+                    <div class="tab-pane fade show active mt-4" id="info" role="tabpanel" aria-labelledby="home-tab">
+                      <table class="table table-hover table-borderless display col-lg-8 offset-lg-2 table-text"
+                        id="bang_thongtinnhanvien">
+                        <tbody></tbody>
+                      </table>
+                      
+                    </div>
+<!-- DX:119:sv_index.html-->                    
+<!-- DX:120:sv_index.html-->                    
+                  </div>
+                </div>
+              </div>
+              <!-- /.card -->
+            </section>
+          </div>
+          <!-- /.row (main row) -->
+        </div>
+        <!-- /.container-fluid -->
+      </section>
+      <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+    {% include 'footer.html' ignore missing %} {% include 'modal.html' ignore
+    missing %}
+
+
+    <!-- Control Sidebar -->
+    <aside class="control-sidebar control-sidebar-dark">
+      <!-- Control sidebar content goes here -->
+    </aside>
+    <!-- /.control-sidebar -->
+  </div>
+  <!-- ./wrapper -->
+
+
+  <!-- jQuery -->
+  <script src="plugins/jquery/jquery.min.js"></script>
+  <!-- jQuery UI 1.11.4 -->
+  <script src="plugins/jquery-ui/jquery-ui.min.js"></script>
+  <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+  <script>
+    $.widget.bridge("uibutton", $.ui.button);
+  </script>
+  <!-- Bootstrap 4 -->
+  <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- ChartJS -->
+  <script src="plugins/chart.js/Chart.min.js"></script>
+  <!-- Sparkline -->
+  <script src="plugins/sparklines/sparkline.js"></script>
+  <!-- JQVMap -->
+  <script src="plugins/jqvmap/jquery.vmap.min.js"></script>
+  <script src="plugins/jqvmap/maps/jquery.vmap.usa.js"></script>
+  <!-- jQuery Knob Chart -->
+  <script src="plugins/jquery-knob/jquery.knob.min.js"></script>
+  <!-- daterangepicker -->
+  <script src="plugins/moment/moment.min.js"></script>
+  <script src="plugins/daterangepicker/daterangepicker.js"></script>
+  <!-- Tempusdominus Bootstrap 4 -->
+  <script src="plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+  <!-- Summernote -->
+  <script src="plugins/summernote/summernote-bs4.min.js"></script>
+  <!-- overlayScrollbars -->
+  <script src="plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+  <!-- AdminLTE App -->
+  <script src="dist/js/adminlte.js"></script>
+  <!-- AdminLTE for demo purposes -->
+  <script src="dist/js/demo.js"></script>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"
+    integrity="sha512-BkpSL20WETFylMrcirBahHfSnY++H2O1W+UnEEO4yNIl+jI2+zowyoGJpbtk6bx97fBXf++WJHSSK2MV4ghPcg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/dataTables.bootstrap4.min.js"
+    integrity="sha512-OQlawZneA7zzfI6B1n1tjUuo3C5mtYuAWpQdg+iI9mkDoo7iFzTqnQHf+K5ThOWNJ9AbXL4+ZDwH7ykySPQc+A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap4.min.css"
+    integrity="sha512-PT0RvABaDhDQugEbpNMwgYBCnGCiTZMh9yOzUsJHDgl/dMhD9yjHAwoumnUk3JydV3QTcIkNDuN40CJxik5+WQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="../../dist/js/pages/nv_index.js"></script>
+</body>
+
+</html>

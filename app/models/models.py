@@ -1,7 +1,7 @@
 import os
 from ..config import create_connection
 from ..send_otp import is_otp_valid
-import datetime
+from datetime import datetime
 import bleach
 import json
 
@@ -57,6 +57,28 @@ def verify_student(email: str, password: str):
     except Exception as e:
         return e
 
+# Duc_7/8:60
+def verify_users_spkt(tk: str, password: str):
+    try:
+        result = cursor.execute("LoginHT_spkt ?, ?", protect_xss(
+            tk), protect_xss(password)).fetchone()[0]
+        if result != None:
+            return result
+        else:
+            return False
+    except Exception as e:
+        return e
+
+def verify_vt_user_spkt(idu: int):
+    try:
+        result = cursor.execute("Verify_VT_U_spkt ?", idu).fetchone()[0]
+        if result != None:
+            return result
+        else:
+            return False
+    except Exception as e:
+        return e    
+# Duc_7/8:60
 
 def get_all_sinh_vien():
     try:
@@ -764,6 +786,16 @@ def xem_thong_tin_sv(email: str):
             return {'id': i[0], 'mssv': i[1], 'hoten': i[2], 'gioitinh': i[3], 'sdt': i[4], 'email': i[5], 'diachi': i[6], 'malop': i[7], 'truong': i[14], 'nganh': i[15], 'khoa': i[10], 'nhomhuongdan': i[16], 'xacnhan': i[12]}
     except Exception as e:
         return e
+    
+# HPDuc6/8
+def xem_thong_tin_nv_spkt(idu: int):
+    try:
+        result = cursor.execute("EXEC GetInfo1User_spkt ?", idu)
+        if result:
+            i = result.fetchone()
+            return {  'hoten': i[4], 'gioitinh': i[5], 'ngaysinh': i[6].strftime('%d/%m/%Y'), 'diachi': i[7], 'dienthoai': i[8], 'email': i[9], 'idclv':i[3], 'TenVaiTro': i[11], 'TenBoPhan': i[12], 'TenPhongBan': i[13]}
+    except Exception as e:
+        return e
 
 
 def insert_danh_gia_thuc_tap(sv_id: int, nhd_id: int, dapan_1: int, dapan_2: int, dapan_3: int, dapan_4: int, gopy: str):
@@ -859,7 +891,18 @@ def update_password_sv(email: str, old_password: str, new_password: str):
         return kq
     except Exception as e:
         return e
-
+    
+# DT_8/8:895
+def update_password_nv(id: int, old_password: str, new_password: str):
+    try:
+        tght= datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # f_tght = f"'{tght}'"
+        result = cursor.execute("ChangePassTK_spkt ?, ?, ?, ?", id, protect_xss(old_password), protect_xss(new_password), tght)
+        kq = result.fetchone()[0]
+        conn.commit()
+        return kq
+    except Exception as e:
+        return e
 
 def get_phan_quyen(username: str):
     try:
@@ -1600,5 +1643,164 @@ def xoa_bieu_mau_by_id(id: int):
             "EXEC XoaBieuMauByID ?", id)
         cursor.commit()
         return True
+    except Exception as e:
+        return e
+
+# HPDuc9/8:1649 Lấy năm chấm công 
+def lay_nam_chc_spkt(idu: int):
+    try:
+        result = cursor.execute("EXEC GetYear_CHC_spkt ?", idu)
+        years = []
+        if result:
+            for row in result.fetchall():
+                
+                years.append(row[0])  
+            return {'nam': years}
+    except Exception as e:
+        return e
+    
+# Lấy tháng chấm công theo năm 9/8:1659
+def lay_thang_chc_spkt(idu: int, nam: int):
+    try:
+        result = cursor.execute("EXEC GetMonth_CHC_spkt ?, ?", idu, nam)
+        month = []
+        if result:
+            for row in result.fetchall():  # Lặp qua từng hàng trong kết quả truy vấn
+                month.append(row[0])  # Thêm giá trị năm vào danh sách
+            return {'thang': month}
+    except Exception as e:
+        return e
+    
+def load_ct_chc_u_spkt(idu: int, thang: int, nam: int, mode: int):
+    try:
+        if mode ==0 or mode ==1:
+            result = cursor.execute("EXEC Get_CHC_U_spkt ?, ?, ?", idu, thang, nam)
+            ngaythang = []
+            giovao = []
+            tre = []
+            giora = []
+            som = []
+            hople= []
+            if result:
+                for row in result.fetchall():  
+                    ngaythang.append(row[0].strftime('%d/%m/%Y'))
+                    giovao.append(row[1].strftime('%H:%M:%S')) 
+                    tre.append(row[2]) 
+                    giora.append(row[3].strftime('%H:%M:%S')) 
+                    som.append(row[4]) 
+                    hople.append(row[5])   
+                return {'ngaythang': ngaythang, 'giovao': giovao, 'tre': tre, 'giora': giora, 'som': som, 'hople': hople}
+        elif mode ==2:
+            result = cursor.execute("EXEC Get_CHC_U_dk1_spkt ?, ?, ?", idu, thang, nam)
+            ngaythang = []
+            giovao = []
+            tre = []
+            giora = []
+            som = []
+            hople= []
+            if result:
+                for row in result.fetchall():  
+                    ngaythang.append(row[0].strftime('%d/%m/%Y'))
+                    giovao.append(row[1].strftime('%H:%M:%S')) 
+                    tre.append(row[2]) 
+                    giora.append(row[3].strftime('%H:%M:%S')) 
+                    som.append(row[4]) 
+                    hople.append(row[5])   
+                return {'ngaythang': ngaythang, 'giovao': giovao, 'tre': tre, 'giora': giora, 'som': som, 'hople': hople}
+        elif mode ==3:
+            result = cursor.execute("EXEC Get_CHC_U_dk2_spkt ?, ?, ?", idu, thang, nam)
+            ngaythang = []
+            giovao = []
+            tre = []
+            giora = []
+            som = []
+            hople= []
+            if result:
+                for row in result.fetchall():  
+                    ngaythang.append(row[0].strftime('%d/%m/%Y'))
+                    giovao.append(row[1].strftime('%H:%M:%S')) 
+                    tre.append(row[2]) 
+                    giora.append(row[3].strftime('%H:%M:%S')) 
+                    som.append(row[4]) 
+                    hople.append(row[5])   
+                return {'ngaythang': ngaythang, 'giovao': giovao, 'tre': tre, 'giora': giora, 'som': som, 'hople': hople}
+        elif mode ==4:
+            result = cursor.execute("EXEC Get_CHC_U_dk3_spkt ?, ?, ?", idu, thang, nam)
+            ngaythang = []
+            giovao = []
+            tre = []
+            giora = []
+            som = []
+            hople= []
+            if result:
+                for row in result.fetchall():  
+                    ngaythang.append(row[0].strftime('%d/%m/%Y'))
+                    giovao.append(row[1].strftime('%H:%M:%S')) 
+                    tre.append(row[2]) 
+                    giora.append(row[3].strftime('%H:%M:%S')) 
+                    som.append(row[4]) 
+                    hople.append(row[5])   
+                return {'ngaythang': ngaythang, 'giovao': giovao, 'tre': tre, 'giora': giora, 'som': som, 'hople': hople}
+        elif mode ==5:
+            result = cursor.execute("EXEC Get_CHC_U_dk4_spkt ?, ?, ?", idu, thang, nam)
+            ngaythang = []
+            giovao = []
+            tre = []
+            giora = []
+            som = []
+            hople= []
+            if result:
+                for row in result.fetchall():  
+                    ngaythang.append(row[0].strftime('%d/%m/%Y'))
+                    giovao.append(row[1].strftime('%H:%M:%S')) 
+                    tre.append(row[2]) 
+                    giora.append(row[3].strftime('%H:%M:%S')) 
+                    som.append(row[4]) 
+                    hople.append(row[5])   
+                return {'ngaythang': ngaythang, 'giovao': giovao, 'tre': tre, 'giora': giora, 'som': som, 'hople': hople}
+    except Exception as e:
+        return e
+    
+def lay_nam_bl_spkt(idu: int):
+    try:
+        result = cursor.execute("EXEC GetYear_BL_spkt ?", idu)
+        years = []
+        if result:
+            for row in result.fetchall():  # Lặp qua từng hàng trong kết quả truy vấn
+                years.append(row[0])  # Thêm giá trị năm vào danh sách
+            return {'nam': years}
+    except Exception as e:
+        return e
+    
+# Lấy tháng chấm công theo năm 9/8:1659
+def lay_thang_bl_spkt(idu: int, nam: int):
+    try:
+        result = cursor.execute("EXEC GetMonth_BL_spkt ?, ?", idu, nam)
+        month = []
+        if result:
+            for row in result.fetchall():  # Lặp qua từng hàng trong kết quả truy vấn
+                month.append(row[0])  # Thêm giá trị năm vào danh sách
+            return {'thang': month}
+    except Exception as e:
+        return e
+
+def load_ct_bl_u_spkt(idu: int, thang: int, nam: int):
+    try:
+        result = cursor.execute("EXEC Get_BL_U_spkt ?, ?, ?", idu, thang, nam).fetchone()
+        if result != None:
+            return {'hoten': result[0], 
+                    'chucvu': result[1], 
+                    'hsl': result[2], 
+                    'lcb': result[3], 
+                    'sltre': result[4], 
+                    'slsom': result[5], 
+                    'slvang': result[6], 
+                    'sldu': result[7], 
+                    'luong': result[8], 
+                    'ngayluu': result[9].strftime('%d/%m/%Y'), 
+                    'thang': result[10], 
+                    'nam': result[11]}
+        else:
+            return -1
     except Exception as e:
         return e
