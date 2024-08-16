@@ -13,10 +13,10 @@ def protect_xss(input: str):
     return bleach.clean(input, tags=['br'], attributes={})
 
 
-def insert_sinh_vien(MSSV: str, HoTen: str, GioiTinh: int, SDT: str, Email: str, DiaChi: str, MaLop: str, Truong: str, Nganh: str, Khoa: int, Password: str) -> bool:
+def insert_nhan_vien(id: int, idthe: str, idpb: int, idclv: int, hoten: str, giottinh: int, diachi: str, dienthoai: str, email: str, trangthai: int) -> bool:
     try:
-        result = cursor.execute("EXEC InsertSinhVien ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", protect_xss(MSSV), protect_xss(
-            HoTen), GioiTinh, protect_xss(SDT), protect_xss(Email), protect_xss(DiaChi), protect_xss(MaLop), Truong, Nganh, Khoa, 0)
+        result = cursor.execute("EXEC InsertSinhVien ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", protect_xss(id), protect_xss(
+            idthe), idpb, protect_xss(idclv), protect_xss(hoten), protect_xss(giottinh), protect_xss(diachi), protect_xss(dienthoai), protect_xss(email), protect_xss(trangthai),)
         r = result.fetchone()
         conn.commit()
         return r[0]
@@ -56,19 +56,57 @@ def verify_student(email: str, password: str):
             return False
     except Exception as e:
         return e
+    
 
-
-def get_all_sinh_vien():
+def get_all_nhan_vien():
     try:
-        result = cursor.execute("EXEC GetDSSVDashboard").fetchall()
-
-        result_data = [{'id': i[0], 'mssv': i[1], 'hoten': i[2], 'gioitinh': i[3],
-                        'nganh': i[4], 'truong': i[5], 'trangthai': i[6], 'luuy': i[7]} for i in result]
-        return result_data
-
+        conn = create_connection()
+        cursor = conn.cursor()
+        result = cursor.execute(
+            """
+            SELECT u.id, u.idthe, u.idpb, u.idclv, u.hoten, u.gioitinh, u.ngaysinh, u.diachi, u.dienthoai, u.email, u.trangthai
+            FROM usercty_spkt u
+            JOIN phanquyen_spkt pq ON u.id = pq.idu
+            ORDER BY u.id;
+            """
+        )
+        data = result.fetchall()
+        conn.close()
+        return [
+            {
+                "id": row.id,
+                "idthe": row.idthe,
+                "hoten": row.hoten,
+                # "gioitinh": "Nam" if row.gioitinh else "Nữ",
+                # "ngaysinh": row.ngaysinh.strftime("%d-%m-%Y"),
+                "diachi": row.diachi,
+                # "dienthoai": row.dienthoai,
+                "email": row.email,
+                "idpb": row.idpb,
+                "idclv": row.idclv,
+                "trangthai": "Đang hoạt động" if row.trangthai else "Ngừng hoạt động"
+            }
+            for row in data
+        ]
+    except Exception as e:
+        print(f"Error: {e}")
+        return []
+    
+    
+def get_phan_quyen_by_username(idu: int):
+    try:
+        i = cursor.execute("EXEC Getphanquyen_spkt?", idu).fetchone()
+        return {'idu': i[0], 'idvt': i[1], 'trangthai': i[2], 'ghichu': i[3]}
     except Exception as e:
         return e
-
+    
+def get_chi_tiet_nhan_vien_by_id(id: int):
+    try:
+        result = cursor.execute("EXEC Getusercty_spkt ?", id)
+        return result.fetchone()
+    except Exception as e:
+        return e
+    
 
 def count_all_sinh_vien():
     try:
@@ -336,7 +374,7 @@ def them_nhom_thuc_tap(nguoihd: str, kytt: str, detai: str, soluong: int, tennho
 
 def get_chi_tiet_sinh_vien_by_id(id: str):
     try:
-        i = cursor.execute("EXEC GetThongTinChiTietSVByID ?", id).fetchone()
+        i = cursor.execute("EXEC GetThongTinChiTietNVByID ?", id).fetchone()
         return {'id': i[0], 'mssv': i[1], 'hoten': i[2], 'gioitinh': 'nam' if i[3] == 1 else 'nữ', 'sdt': f'0{i[4]}', 'email': i[5], 'diachi': i[6], 'malop': i[7], 'khoa': i[8], 'nganh': i[9], 'truong': i[10], 'tendetai': i[12], 'ngaybatdau': i[13], 'nguoihuongdan': i[14]}
     except Exception as e:
         return e

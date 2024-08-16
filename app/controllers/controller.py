@@ -4,14 +4,17 @@ from ..utils.create_pdf import *
 from ..config import default_password, secret_key, algorithm
 
 
-def insert_sinh_vien_controller(MSSV, HoTen: str, GioiTinh: int, SDT: str, Email: str, DiaChi: str, MaLop: str, Truong: int, Nganh: int, Khoa: int, Password: str) -> bool:
-    result = insert_sinh_vien(MSSV, HoTen, GioiTinh,
-                              SDT, Email, DiaChi, MaLop, Truong, Nganh, Khoa, Password)
-    return result
+# def insert_nhan_vien_controller(id: int, idthe: str, idpb: int, idclv: int, hoten: str, giottinh: int, diachi: str, dienthoai: str, email: str, trangthai: int) -> bool:
+#     result = insert_nhan_vien(id, idthe, idpb, idclv, hoten, giottinh, diachi, dienthoai, email, trangthai)
+#     return result
 
 
-def get_all_sinh_vien_controller():
-    return get_all_sinh_vien()
+def get_all_nhan_vien_controller():
+    return get_all_nhan_vien() 
+
+
+def get_chi_tiet_nhan_vien_by_id_controller(id: int):
+    return get_chi_tiet_nhan_vien_by_id(id)
 
 
 def count_all_sinh_vien_controller():
@@ -121,8 +124,7 @@ def them_nhom_thuc_tap_controller(nguoihd: str, kytt: str, detai: str, soluong: 
     return them_nhom_thuc_tap(nguoihd, kytt, detai, soluong, tennhom, telegram, isDeleted, ghichu)
 
 
-def get_chi_tiet_sinh_vien_by_id_controller(id: str):
-    return get_chi_tiet_sinh_vien_by_id(id)
+
 
 
 def get_trang_thai_sinh_vien_by_id_controller(id: str):
@@ -273,8 +275,8 @@ def xem_thong_tin_sv_controller(email: str):
     return xem_thong_tin_sv(email)
 
 
-def them_chi_tiet_cong_viec_controller(id_congviec: int, id_sinhvien: int, trangthai: int, ghichu: str):
-    return them_chi_tiet_cong_viec(id_congviec, id_sinhvien, trangthai, ghichu)
+# def them_chi_tiet_cong_viec_controller(id_congviec: int, id_sinhvien: int, trangthai: int, ghichu: str):
+#     return them_chi_tiet_cong_viec(id_congviec, id_sinhvien, trangthai, ghichu)
 
 
 def get_chi_tiet_cong_viec_by_id_cong_viec_controller(id: int):
@@ -460,8 +462,8 @@ def get_all_yeu_cau_in_phieu_controller(kythuctap: str):
     return get_all_yeu_cau_in_phieu(kythuctap)
 
 
-def update_yeu_cau_in_phieu_controller(ids: list, id_nxl: int, trangthai: int):
-    return update_yeu_cau_in_phieu(ids, id_nxl, trangthai)
+# def update_yeu_cau_in_phieu_controller(ids: list, id_nxl: int, trangthai: int):
+#     return update_yeu_cau_in_phieu(ids, id_nxl, trangthai)
 
 
 def get_username_nguoi_huong_dan_by_sv_id_controller(id: int):
@@ -481,8 +483,8 @@ def get_all_chuc_nang_controller():
     return get_all_chuc_nang()
 
 
-def insert_chuc_nang_controller(url: str, ten: str, mota: str, trangthai: int):
-    return insert_chuc_nang(url, ten, mota, trangthai)
+# def insert_chuc_nang_controller(url: str, ten: str, mota: str, trangthai: int):
+#     return insert_chuc_nang(url, ten, mota, trangthai)
 
 
 def update_xoa_chuc_nang_controller(id: int):
@@ -493,16 +495,16 @@ def get_chi_tiet_chuc_nang_by_id_controller(id: int):
     return get_chi_tiet_chuc_nang_by_id(id)
 
 
-def update_chi_tiet_chuc_nang_by_id_controller(id: int, url: str, ten: str, mota: str, trangthai: int):
-    return update_chi_tiet_chuc_nang_by_id(id, url, ten, mota, trangthai)
+# def update_chi_tiet_chuc_nang_by_id_controller(id: int, url: str, ten: str, mota: str, trangthai: int):
+#     return update_chi_tiet_chuc_nang_by_id(id, url, ten, mota, trangthai)
 
 
 def get_all_vai_tro_chuc_nang_controller():
     return get_all_vai_tro_chuc_nang()
 
 
-def update_trang_thai_vai_tro_controller(idvt: int, trangthai: int):
-    return update_trang_thai_vai_tro(idvt, trangthai)
+# def update_trang_thai_vai_tro_controller(idvt: int, trangthai: int):
+#     return update_trang_thai_vai_tro(idvt, trangthai)
 
 
 def insert_vai_tro_controller(ten: str, idcn: list):

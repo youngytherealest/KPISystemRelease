@@ -2,8 +2,12 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
   <!-- Brand Logo -->
   <a href="/" class="brand-link">
-    <img src="{{ url_for('dist', path='/img/logo.png') }}" alt="Logo" class="brand-image" />
-    <span class="brand-text font-weight-light">HTQL SVTT</span>
+    <img
+      src="{{ url_for('dist', path='/img/logo.png') }}"
+      alt="Logo"
+      class="brand-image"
+    />
+    <span class="brand-text font-weight-light">HTCC KPISYSTEM</span>
   </a>
 
   <!-- Sidebar -->
@@ -11,7 +15,11 @@
     <!-- Sidebar user panel (optional) -->
     <div class="user-panel mt-3 pb-3 mb-3 d-flex">
       <div class="image">
-        <img id="dashboard_avatar_url" class="img-circle elevation-2" alt="User Avatar" />
+        <img
+          id="dashboard_avatar_url"
+          class="img-circle elevation-2"
+          alt="User Avatar"
+        />
       </div>
       <div class="info">
         <a class="d-block" id="dashboard_user_fullname"></a>
@@ -20,150 +28,43 @@
 
     <!-- Sidebar Menu -->
     <nav class="mt-2">
-      <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+      <ul
+        class="nav nav-pills nav-sidebar flex-column"
+        data-widget="treeview"
+        role="menu"
+        data-accordion="false"
+      >
         <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
         <li class="nav-item">
           <a href="/" class="nav-link" id="dashboard_home">
-            <i class="fa-solid fa-chart-line"></i>
-            <p>Dashboard</p>
+            <i class="fa-solid fa-city"></i>
+            <p>Trang chủ</p>
           </a>
         </li>
-        <li class="nav-item parent" hidden>
-          <a href="#" class="nav-link" id="sinhvien">
-            <i class="fa-solid fa-user-graduate"></i>
-            <p>
-              Sinh viên
-              <i class="right fas fa-angle-left"></i>
-            </p>
+        <li class="nav-item">
+          <a href="/quanlynhanvien" class="nav-link" id="nhanvien">
+            <i class="fa-solid fa-address-card"></i>
+            <p>QLTT Nhân viên</p>
           </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="/danhgiasinhvien" class="nav-link" id="sinhvien_danhgiasinhvien" hidden>
-                <i class="fa-solid fa-person-circle-check"></i>
-                <p>Đánh giá sinh viên</p>
-              </a>
-            </li>
-
-            <li class="nav-item">
-              <a href="/giaoviec" class="nav-link" id="sinhvien_giaoviec" hidden>
-                <i class="fa-solid fa-business-time"></i>
-                <p>Giao việc sinh viên</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/theodoitiendo" class="nav-link" id="sinhvien_theodoitiendo" hidden>
-                <i class="fa-solid fa-timeline"></i>
-                <p>Theo dõi tiến độ</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/yeucauinphieu" class="nav-link" id="sinhvien_yeucauinphieu" hidden>
-                <i class="fa-solid fa-check-to-slot"></i>
-                <p>Yêu cầu in phiếu</p>
-              </a>
-            </li>
-          </ul>
         </li>
-        <li class="nav-item parent" hidden>
+        <li class="nav-item">
           <a href="#" class="nav-link" id="thuctap">
-            <i class="fa-solid fa-list"></i>
-            <p>
-              Thực tập
-              <i class="right fas fa-angle-left"></i>
-            </p>
+            <i class="fa-solid fa-address-book"></i>
+            <p>QL Tài khoản</p>
           </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="/danhsachdetai" class="nav-link" id="thuctap_danhsachdetai" hidden>
-                <i class="fa-solid fa-diagram-project"></i>
-                <p>Danh sách đề tài</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/danhsachkythuctap" class="nav-link" id="thuctap_danhsachkythuctap" hidden>
-                <i class="fa-solid fa-calendar-days"></i>
-                <p>Danh sách kỳ thực tập</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/danhsachnhomthuctap" class="nav-link" id="thuctap_danhsachnhomthuctap" hidden>
-                <i class="fa-solid fa-layer-group"></i>
-                <p>Danh sách nhóm</p>
-              </a>
-            </li>
-          </ul>
         </li>
-        <li class="nav-item parent" hidden>
+        <li class="nav-item">
           <a href="#" class="nav-link" id="templates">
-            <i class="fa-solid fa-book-bookmark"></i>
-            <p>
-              Danh sách biểu mẫu
-              <i class="right fas fa-angle-left"></i>
-            </p>
+            <i class="fa-solid fa-calendar-days"></i>
+            <p>QL Chấm công</p>
           </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="/templates" class="nav-link" id="templates_templates" hidden>
-                <i class="fa-solid fa-book"></i>
-                <p>Biểu mẫu</p>
-              </a>
-            </li>
-          </ul>
         </li>
-        <li class="nav-item parent" hidden>
+        <li class="nav-item">
           <a href="#" class="nav-link" id="danhmuc">
-            <i class="fa-solid fa-table-list"></i>
-            <p>
-              Danh mục
-              <i class="right fas fa-angle-left"></i>
-            </p>
+            <i class="fa-solid fa-industry"></i>
+            <p>QL Lương tạm thời</p>
           </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="/danhmucnganh" class="nav-link" id="danhmuc_danhmucnganh" hidden>
-                <i class="fa-solid fa-code-branch"></i>
-                <p>Danh mục ngành</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/mappingchucnang" class="nav-link" id="danhmuc_mappingchucnang" hidden>
-                <i class="fa-solid fa-sitemap"></i>
-                <p>Mapping chức năng</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/danhmucphanquyen" class="nav-link" id="danhmuc_danhmucphanquyen" hidden>
-                <i class="fa-solid fa-user-gear"></i>
-                <p>Danh mục phân quyền</p>
-              </a>
-            </li>
-          </ul>
-        </li>
-        <li class="nav-item parent" id="menu_hethong">
-          <a href="#" class="nav-link" id="hethong">
-            <i class="fa-solid fa-gears"></i>
-            <p>
-              Thiết lập
-              <i class="right fas fa-angle-left"></i>
-            </p>
-          </a>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="/quanlytaikhoan" class="nav-link" id="hethong_quanlytaikhoan" hidden>
-                <i class="fa-solid fa-user-group"></i>
-                <p>Quản lý tài khoản</p>
-              </a>
-            </li>
-          </ul>
-          <ul class="nav nav-treeview">
-            <li class="nav-item">
-              <a href="/doimatkhau" class="nav-link" id="hethong_doimatkhau">
-                <i class="fa-solid fa-unlock-keyhole"></i>
-                <p>Đổi mật khẩu</p>
-              </a>
-            </li>
-          </ul>
         </li>
       </ul>
     </nav>

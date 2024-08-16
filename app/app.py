@@ -235,18 +235,50 @@ async def hosonguoihuongdan(request: Request, id: str):
     return templates.TemplateResponse('profile.html', context={'request': request, 'profile': profile})
 
 
-@app.get('/danhgiasinhvien')
-async def danhgiasinhvien(request: Request, token: str = Cookie(None)):
+#quan_ly_thong_tin_nhan_vien
+@app.get('/quanlynhanvien')
+async def quanlynhanvien(request: Request, token: str = Cookie(None)):
     if token:
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             permission = payload.get("permission")
             id = payload.get("id")
-            if permission == "user" and check_role(id, '/danhgiasinhvien'):
-                return templates.TemplateResponse('student_review.html', context={'request': request})
+            if permission == "user" and check_role(id, "/quanlynhanvien"):
+                return templates.TemplateResponse(
+                    "quanlynhanvien.html", context={"request": request}
+                )
 
         except jwt.PyJWTError:
-            return templates.TemplateResponse('login.html', context={'request': request})
+            return templates.TemplateResponse(
+                "login.html", context={"request": request}
+            )
+    return RedirectResponse("/login")
+
+
+@app.get('/get_all_nhan_vien')
+async def get_all_nhan_vien_route(token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                result = get_all_nhan_vien_controller()
+                return JSONResponse(status_code=200, content=result)
+        except jwt.PyJWTError:
+            return RedirectResponse('/login')
+    return RedirectResponse('/login')
+
+
+@app.get('/get_chi_tiet_nhan_vien_by_id')
+async def get_chi_tiet_nhan_vien_by_id(id: int, token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                return JSONResponse(status_code=200, content=get_chi_tiet_nhan_vien_by_id(id))
+        except jwt.PyJWTError:
+            return RedirectResponse('/login')
     return RedirectResponse('/login')
 
 
@@ -372,18 +404,6 @@ async def get_so_luong_sinh_vien_theo_nganh_route(token: str = Cookie(None)):
     return RedirectResponse('/login')
 
 
-@app.get('/get_all_sinh_vien')
-async def get_all_sinh_vien_route(token: str = Cookie(None)):
-    if token:
-        try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            permission = payload.get("permission")
-            if permission == "user":
-                result = get_all_sinh_vien_controller()
-                return JSONResponse(status_code=200, content=result)
-        except jwt.PyJWTError:
-            return RedirectResponse('/login')
-    return RedirectResponse('/login')
 
 
 @app.get('/get_user_info_by_username')
