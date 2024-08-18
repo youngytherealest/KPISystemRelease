@@ -74,8 +74,13 @@ def get_performance_by_department_controller():
 
 
 # Biểu đồ đi trễ về sớm
-def get_attendance_rates_by_month_controller():
-    return get_attendance_rates_by_month()
+def get_attendance_percentages_by_month_controller():
+    return get_attendance_percentages_by_month()
+
+
+# Tỷ lệ đi làm đúng giờ giữa các phòng ban
+def get_on_time_rate_by_department_by_month_controller():
+    return get_on_time_rate_by_department_by_month()
 
 
 def count_all_sinh_vien_controller():

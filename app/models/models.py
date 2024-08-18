@@ -186,18 +186,15 @@ def get_all_provinces():
 # Thống kê nhân viên chưa chấm công
 def get_all_nhan_vien_khong_cham_cong(department, position, date):
     try:
+        # Câu query cơ bản để lấy thông tin nhân viên không chấm công đúng giờ
         base_query = """
-            SELECT u.id, u.hoten, u.gioitinh, u.dienthoai, u.email, u.diachi, vt.tenvt, pb.tenpb
+            SELECT u.id, u.hoten, u.gioitinh, u.dienthoai, u.email, u.diachi, vt.tenvt, pb.tenpb, cc.tre
             FROM usercty_spkt u
             LEFT JOIN phanquyen_spkt pq ON u.id = pq.idu
             LEFT JOIN vaitro_spkt vt ON pq.idvt = vt.idvt
             LEFT JOIN phongban_spkt pb ON u.idpb = pb.idpb
-            WHERE u.id NOT IN (
-                SELECT cc.idu
-                FROM chamcong_spkt cc
-                WHERE cc.ngaythang = ?
-                
-            )
+            LEFT JOIN chamcong_spkt cc ON u.id = cc.idu AND cc.ngaythang = ?
+            WHERE (cc.hople IS NULL OR cc.hople = 0) 
         """
 
         conditions = []
@@ -205,7 +202,7 @@ def get_all_nhan_vien_khong_cham_cong(department, position, date):
 
         if department:
             conditions.append(
-                "u.idpb = (SELECT idpb FROM phongban_spkt WHERE tenpb = ?)"
+                "u.idpb IN (SELECT idpb FROM phongban_spkt WHERE tenpb = ?)"
             )
             params.append(department)
         if position:
@@ -227,7 +224,9 @@ def get_all_nhan_vien_khong_cham_cong(department, position, date):
                 "diachi": i[5],
                 "tenvt": i[6],
                 "tenpb": i[7],
-                "trangthai": "Chưa Chấm Công",  # Thêm cột trạng thái
+                "trangthai": (
+                    "Đi trễ" if i[8] == 1 else "Chưa Chấm Công"
+                ),  # Thêm trạng thái "Đi trễ" nếu cột 'tre' = 1
             }
             for i in result
         ]
@@ -244,7 +243,7 @@ def get_performance_by_department():
         query = """
             SELECT pb.tenpb AS department, 
                    MONTH(cc.ngaythang) AS month, 
-                   SUM(DATEDIFF(MINUTE, cc.giovao, cc.giora)/60.0) AS hours
+                   SUM(DATEDIFF(MINUTE, cc.giovao, cc.giora) / 60.0) AS hours
             FROM chamcong_spkt cc
             JOIN usercty_spkt u ON cc.idu = u.id
             JOIN phongban_spkt pb ON u.idpb = pb.idpb
@@ -256,10 +255,10 @@ def get_performance_by_department():
         for row in result:
             department = row[0]
             month = row[1]
-            hours = row[2]
+            hours = row[2] if row[2] is not None else 0
             if department not in data:
                 data[department] = [0] * 12
-            data[department][month - 1] = hours
+            data[department][month - 1] = max(0, hours)  # Đảm bảo không có giá trị âm
         return data
 
     except Exception as e:
@@ -268,38 +267,80 @@ def get_performance_by_department():
 
 
 # Biểu đồ tỉ lệ đi trễ về sớm
-def get_attendance_rates_by_month():
+def get_attendance_percentages_by_month():
     try:
         query = """
             WITH MonthlyAttendance AS (
                 SELECT 
-                    MONTH(cc.ngaythang) AS month, 
+                    MONTH(cc.ngaythang) AS month,
                     COUNT(*) AS total_records,
-                    SUM(CASE WHEN DATEDIFF(MINUTE, cl.tg_bd, cc.giovao) > 0 THEN 1 ELSE 0 END) AS late_count,
-                    SUM(CASE WHEN DATEDIFF(MINUTE, cc.giora, cl.tg_kt) < 0 THEN 1 ELSE 0 END) AS early_leave_count,
-                    SUM(CASE WHEN DATEDIFF(MINUTE, cl.tg_bd, cc.giovao) = 0 AND DATEDIFF(MINUTE, cc.giora, cl.tg_kt) = 0 THEN 1 ELSE 0 END) AS on_time_count
+                    SUM(CASE WHEN cc.som = 1 THEN 1 ELSE 0 END) AS early_leave_count,
+                    SUM(CASE WHEN cc.tre = 1 THEN 1 ELSE 0 END) AS late_count,
+                    SUM(CASE WHEN cc.hople = 1 THEN 1 ELSE 0 END) AS on_time_count
                 FROM chamcong_spkt cc
-                JOIN ca_lam_spkt cl ON cc.idcc = cl.idclv
                 GROUP BY MONTH(cc.ngaythang)
             )
             SELECT 
-                month,
-                CAST(late_count * 100.0 / total_records AS FLOAT) AS late_rate,
-                CAST(early_leave_count * 100.0 / total_records AS FLOAT) AS early_leave_rate,
-                CAST(on_time_count * 100.0 / total_records AS FLOAT) AS on_time_rate,
-                CAST((SELECT COUNT(*) FROM usercty_spkt u WHERE u.id NOT IN (SELECT idu FROM chamcong_spkt WHERE MONTH(ngaythang) = ma.month AND YEAR(ngaythang) = YEAR(GETDATE()))) * 100.0 / (SELECT COUNT(*) FROM usercty_spkt) AS FLOAT) AS absent_rate
-            FROM MonthlyAttendance ma
-            ORDER BY month
+                COALESCE(ma.month, m.month) AS month,
+                COALESCE(ma.early_leave_count, 0) * 100.0 / COALESCE(ma.total_records, 1) AS early_leave_percentage,
+                COALESCE(ma.late_count, 0) * 100.0 / COALESCE(ma.total_records, 1) AS late_percentage,
+                COALESCE(ma.on_time_count, 0) * 100.0 / COALESCE(ma.total_records, 1) AS on_time_percentage,
+                COALESCE((SELECT COUNT(*) FROM usercty_spkt u WHERE u.id NOT IN 
+                      (SELECT idu FROM chamcong_spkt WHERE MONTH(ngaythang) = ma.month)) * 100.0 
+                      / (SELECT COUNT(*) FROM usercty_spkt), 0) AS absent_percentage
+            FROM (SELECT 1 AS month UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL 
+                  SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL 
+                  SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL 
+                  SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12) m
+            LEFT JOIN MonthlyAttendance ma ON ma.month = m.month
+            ORDER BY m.month
         """
         result = cursor.execute(query).fetchall()
         data = {
             "months": [row[0] for row in result],
-            "late_rate": [float(row[1]) for row in result],
-            "early_leave_rate": [float(row[2]) for row in result],
-            "on_time_rate": [float(row[3]) for row in result],
-            "absent_rate": [float(row[4]) for row in result],
+            "early_leave_percentage": [row[1] for row in result],
+            "late_percentage": [row[2] for row in result],
+            "on_time_percentage": [row[3] for row in result],
+            "absent_percentage": [row[4] for row in result],
         }
-        print(data)  # Kiểm tra dữ liệu trả về
+        return data
+
+    except Exception as e:
+        print("Error: ", e)
+        return {"error": str(e)}
+
+
+# Tỷ lệ Đi làm Đúng Giờ Giữa Các Phòng Ban
+def get_on_time_rate_by_department_by_month():
+    try:
+        query = """
+            WITH MonthlyAttendance AS (
+                SELECT 
+                    pb.tenpb AS department,
+                    MONTH(cc.ngaythang) AS month, 
+                    COUNT(*) AS total_records,
+                    SUM(CASE WHEN cc.hople = 1 THEN 1 ELSE 0 END) AS on_time_count
+                FROM chamcong_spkt cc
+                JOIN usercty_spkt u ON cc.idu = u.id
+                JOIN phongban_spkt pb ON u.idpb = pb.idpb
+                GROUP BY pb.tenpb, MONTH(cc.ngaythang)
+            )
+            SELECT 
+                department,
+                month,
+                CAST(on_time_count * 100.0 / total_records AS FLOAT) AS on_time_percentage
+            FROM MonthlyAttendance
+            ORDER BY department, month
+        """
+        result = cursor.execute(query).fetchall()
+        data = {}
+        for row in result:
+            department = row[0]
+            month = row[1]
+            on_time_percentage = row[2]
+            if department not in data:
+                data[department] = [0] * 12
+            data[department][month - 1] = on_time_percentage
         return data
 
     except Exception as e:

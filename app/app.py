@@ -218,6 +218,7 @@ async def home(request: Request, token: str = Cookie(None)):
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             permission = payload.get("permission")
             if permission == "user":
+                
                 tong_nhan_vien = count_all_nhan_vien_controller()
                 ti_le_cham_cong_trong_ngay = (
                     ti_le_nhan_vien_cham_cong_trong_ngay_controller()
@@ -235,6 +236,7 @@ async def home(request: Request, token: str = Cookie(None)):
                         "dashboard_nvdadiemdanh": nv_da_diem_danh,
                         "dashboard_nvchuadiemdanh": nv_chua_diem_danh,
                         "nhan_vien_theo_vai_tro": nhan_vien_theo_vai_tro,
+                        
                     },
                 )
             else:
@@ -344,7 +346,7 @@ async def get_all_nhan_vien_khong_cham_cong_route(
     return RedirectResponse("/login")
 
 
-# Biểu đồ tỷ lệ chấm công theo tháng
+# Biểu đồ hiệu suất làm việc theo phòng ban
 @app.get("/get_performance_by_department")
 async def get_performance_by_department_route(token: str = Cookie(None)):
     if token:
@@ -359,14 +361,28 @@ async def get_performance_by_department_route(token: str = Cookie(None)):
 
 
 # Biểu đồ đi trễ về sớm
-@app.get("/get_attendance_rates_by_month")
-async def get_attendance_rates_by_month_route(token: str = Cookie(None)):
+@app.get("/get_attendance_percentages_by_month")
+async def get_attendance_percentages_by_month_route(token: str = Cookie(None)):
     if token:
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             permission = payload.get("permission")
             if permission == "user":
-                return get_attendance_rates_by_month_controller()
+                return get_attendance_percentages_by_month_controller()
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
+
+
+# Tỷ lệ đi làm đúng giờ giữa các phòng ban
+@app.get("/get_on_time_rate_by_department_by_month")
+async def get_on_time_rate_by_department_by_month_route(token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                return get_on_time_rate_by_department_by_month_controller()
         except jwt.PyJWTError:
             return RedirectResponse("/login")
     return RedirectResponse("/login")

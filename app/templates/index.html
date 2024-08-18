@@ -57,7 +57,7 @@
                 <div class="small-box bg-warning">
                   <div class="inner">
                     <h3>{{ dashboard_ti_le_cham_cong_trong_ngay }}%</h3>
-                    <p>Tỷ Lệ Nhân Viên Chấm Công Hôm Nay</p>
+                    <p>Tỷ Lệ NV Chấm Công Hôm Nay</p>
                   </div>
                   <div class="icon">
                     <i class="fas fa-clock"></i>
@@ -128,8 +128,7 @@
               </script>
 
               <!-- Biểu đồ phân tích hiệu suất làm việc theo phòng ban  -->
-              <!-- Biểu đồ phân tích hiệu suất làm việc theo phòng ban  -->
-              <!-- Biểu đồ phân tích hiệu suất làm việc theo phòng ban  -->
+
               <section class="col-lg-6 connectedSortable">
                 <!-- Custom tabs (Charts with tabs)-->
                 <div class="card">
@@ -170,8 +169,8 @@
                 <div class="card">
                   <div class="card-header">
                     <h3 class="card-title">
-                      <i class="fa-solid fa-chart-line"></i>
-                      Tỷ lệ đi trễ, về sớm, đúng giờ và nghỉ theo tháng
+                      <i class="fa-solid fa-chart-column"></i>
+                      Tỷ lệ % đi trễ, về sớm, nghỉ và đúng giờ
                     </h3>
                   </div>
                   <!-- /.card-header -->
@@ -179,10 +178,40 @@
                     <div class="tab-content p-0">
                       <div
                         class="chart tab-pane active"
-                        id="attendance-rates-chart"
+                        id="attendance-percentages-chart"
                       >
                         <canvas
-                          id="attendance-rates-chart-canvas"
+                          id="attendance-percentages-chart-canvas"
+                          style="height: 250px; width: 100%"
+                        ></canvas>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+              </section>
+
+              <!-- Tỷ lệ đi làm đúng giờ giữa các phòng ban -->
+
+              <section class="col-lg-6 connectedSortable">
+                <!-- Custom tabs (Charts with tabs)-->
+                <div class="card">
+                  <div class="card-header">
+                    <h3 class="card-title">
+                      <i class="fa-solid fa-chart-bar"></i>
+                      Tỷ lệ Đi làm Đúng Giờ Giữa Các Phòng Ban
+                    </h3>
+                  </div>
+                  <!-- /.card-header -->
+                  <div class="card-body">
+                    <div class="tab-content p-0">
+                      <div
+                        class="chart tab-pane active"
+                        id="on-time-rate-chart"
+                      >
+                        <canvas
+                          id="on-time-rate-chart-canvas"
                           style="height: 250px; width: 100%"
                         ></canvas>
                       </div>
@@ -200,13 +229,14 @@
                   <div class="card-header border-0">
                     <h3 class="card-title">
                       <i class="fa-solid fa-list-ol"></i>
-                      Báo cáo chi tiết nhân viên chưa chấm công trong ngày
+                      Báo cáo chi tiết nhân viên chưa chấm công và đi trễ trong
+                      ngày
                     </h3>
                     <div align="right">
                       <small
                         ><em
                           >Hiển thị cảnh báo nhân viên chưa thực hiện chấm công
-                          trong ngày</em
+                          và đi trễ trong ngày</em
                         ></small
                       >
                     </div>
