@@ -889,3 +889,11 @@ def get_chi_tiet_bieu_mau_by_id_controller(id: int):
 
 def xoa_bieu_mau_by_id_controller(id: int):
     return xoa_bieu_mau_by_id(id)
+
+# controler.py
+def get_dschc_pub_spkt_controller():
+    return get_dschc_pub_spkt()
+
+# controler.py
+def th_chc_spkt_controller(idt: str):
+    return th_chc_spkt(idt)

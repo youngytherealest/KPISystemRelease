@@ -3994,3 +3994,20 @@ async def get_ds_chuc_nang_by_user_id_route(token: str = Cookie(None)):
 
 
 # Mục Điểm Danh Của Trang Login
+# New
+@app.get("/get_dschc_pub_spkt")
+async def get_dschc_pub_spkt_route():
+    result = get_dschc_pub_spkt_controller()
+    if 'error' in result:
+        return JSONResponse(status_code=500, content=result)
+    return JSONResponse(status_code=200, content=result)
+
+@app.post("/th_chc_spkt")
+async def th_chc_spkt_route(idt: str):
+    result = th_chc_spkt_controller(idt)
+    if result==1:
+        return JSONResponse(status_code=200, content={'status': 'OK VAO'})
+    elif result==2:
+        return JSONResponse(status_code=200, content={'status': 'OK RA'})
+    else:
+        return JSONResponse(status_code=400, content={'status': 'NO MODIFY'})

@@ -2780,3 +2780,61 @@ def xoa_bieu_mau_by_id(id: int):
         return True
     except Exception as e:
         return e
+    
+# modules.py
+def get_dschc_pub_spkt():
+    try:
+        now = datetime.datetime.now()
+        formatted_date = f"{now:%Y-%m-%d}"
+
+        result = cursor.execute("EXEC DS_CHC_pub_spkt ?", formatted_date)
+        print(formatted_date)
+        
+        hoten = []
+        giovao = []
+        giora = []
+        ngaythang = []
+
+        if result:
+            for row in result.fetchall(): 
+                hoten.append(row[0])
+                giovao.append(row[1].strftime('%H:%M:%S')) 
+                giora.append(row[2].strftime('%H:%M:%S')) 
+                ngaythang.append(row[3])
+            return {'hoten': hoten, 'giovao': giovao, 'giora': giora, 'ngaythang': ngaythang}
+
+    except (TypeError, ValueError) as e:
+        return {'error': f"Lỗi định dạng thời gian: {e}"}
+    
+# modules.py
+import datetime
+import pyodbc
+def th_chc_spkt(idt: str):
+    try:
+        now = datetime.datetime.now()
+        formatted_date = now.strftime('%Y-%m-%d')
+        formatted_time = now.strftime('%H:%M:%S')
+        print(formatted_date)
+        print(formatted_time)
+        print(idt)
+        
+        # Execute stored procedure with parameters
+        result = cursor.execute("EXEC CHC_spkt ?, ?, ?", idt, formatted_date, formatted_time)
+        print(result)
+        rows = result.fetchone()[0]
+
+        # In ra kết quả
+        print(rows)
+    
+        # Check if there are any results
+        #kq = result.fetchone()[0]
+        #print(kq)
+        conn.commit()  # Commit only if there's a result to update
+        return rows
+    
+    except (TypeError, ValueError) as e:
+        # Handle specific exceptions for data type errors
+        return f"Lỗi định dạng dữ liệu: {e}"
+
+    except pyodbc.Error as e:
+        print("Error:", e)
