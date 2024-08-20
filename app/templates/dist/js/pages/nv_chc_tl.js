@@ -185,11 +185,11 @@ function load_ChiTietChamcong(mode=0) {
       { data: "giora" },
       { 
         render: function (data, type, row) {
-          let tre= row.tre===1 ? 
+          let tre= row.tre===true ? 
           '<center><span class="badge badge-danger badge-medium">Đi trễ</span></center>':
           '';
-          let som= row.som===1 ? 
-          '<center><span class="badge badge-danger">, Về sớm</span></center>':
+          let som= row.som===true ? 
+          '<center><span class="badge badge-danger">Về sớm</span></center>':
           '';
           if(tre=='' && som==''){
             let n='<center><span class="badge badge-success">Không vi phạm</span></center>'
@@ -346,7 +346,7 @@ function load_Bangluong(mode=0) {
             <i class="fa-solid fa-download"></i> Tải bảng lương
             </button>
             <button type="button" id="CT_l" class="btn btn-primary btn-text col-lg-4 offset-lg-4">
-            <i class="fa-solid fa-circle-info"></i> Xem cách tính lương
+            <i class="fa-solid fa-circle-info"></i> Xem qui định
             </button>`;
       btnbangluong.append(html);
     },
