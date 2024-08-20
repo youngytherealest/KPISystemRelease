@@ -62,7 +62,6 @@ document.getElementById("username").addEventListener("keydown", (event) => {
 
 
 function load_ChiTietChamcong() {
-    
   $("#dschcpub").empty();
   $("#dschcpub").append(`
     <thead>
@@ -73,39 +72,39 @@ function load_ChiTietChamcong() {
         <th scope="col" style="text-align: center;" width="15%">Ngày tháng</th>
       </tr>
     </thead>
-    `);
+  `);
 
-  let dschcpub = $("#dschcpub").dataTable({
+  let dschcpub = $("#dschcpub").DataTable({
     paging: true,
     pageLength: 10,
     pagingType: 'full_numbers',
     language: {
       paginate: {
-          first: 'Trang đầu',   // Nút "First"
-          last: 'Trang cuối',    // Nút "Last"
-          next: '>>',      // Nút "Next"
-          previous: '<<'  // Nút "Previous"
+          first: 'Trang đầu',   
+          last: 'Trang cuối',    
+          next: '>>',      
+          previous: '<<'  
       }
     },
     lengthChange: false,
     searching: false,
     ordering: true,
+    order: [[2, 'desc']], // Sắp xếp theo cột Giờ ra (index 2) giảm dần
     info: false,
     destroy: true,
     autoWidth: false,
     responsive: true,
     ajax: {
       type: "GET",
-      url:
-        "/get_dschc_pub_spkt",
-        dataSrc: function(json) {
-          return json.hoten.map((ten, index) => ({
-            hoten: ten,
-            giovao: json.giovao[index],
-            giora: json.giora[index],
-            ngaythang: json.ngaythang[index]
-          }));
-        },
+      url: "/get_dschc_pub_spkt",
+      dataSrc: function(json) {
+        return json.hoten.map((ten, index) => ({
+          hoten: ten,
+          giovao: json.giovao[index],
+          giora: json.giora[index],
+          ngaythang: json.ngaythang[index]
+        }));
+      },
       error: function () {
         $.fn.dataTable.ext.errMode = "throw";
         Toast.fire({
@@ -124,6 +123,7 @@ function load_ChiTietChamcong() {
 
   dschcpub.prop("hidden", false);
 }
+
 
 // Thực hiện hàm trên khi trang web sẵn sàng
 $(document).ready(function () {

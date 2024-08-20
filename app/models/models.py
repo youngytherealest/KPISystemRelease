@@ -2796,15 +2796,21 @@ def get_dschc_pub_spkt():
         ngaythang = []
 
         if result:
-            for row in result.fetchall(): 
+            for row in result.fetchall():
                 hoten.append(row[0])
-                giovao.append(row[1].strftime('%H:%M:%S')) 
-                giora.append(row[2].strftime('%H:%M:%S')) 
+                giovao.append(row[1].strftime('%H:%M:%S'))
+                giora.append(row[2].strftime('%H:%M:%S'))
                 ngaythang.append(row[3])
+            
+            # Sắp xếp danh sách theo giờ ra mới nhất
+            sorted_data = sorted(zip(hoten, giovao, giora, ngaythang), key=lambda x: x[2], reverse=True)
+            hoten, giovao, giora, ngaythang = zip(*sorted_data)
+            
             return {'hoten': hoten, 'giovao': giovao, 'giora': giora, 'ngaythang': ngaythang}
 
     except (TypeError, ValueError) as e:
         return {'error': f"Lỗi định dạng thời gian: {e}"}
+
     
 # modules.py
 import datetime
