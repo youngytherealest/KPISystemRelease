@@ -255,31 +255,108 @@ async def quanlynhanvien(request: Request, token: str = Cookie(None)):
     return RedirectResponse("/login")
 
 
-@app.get('/get_all_nhan_vien')
-async def get_all_nhan_vien_route(token: str = Cookie(None)):
+@app.get("/get_all_nhan_vien_moi")
+async def get_all_nhan_vien_moi_route(token: str = Cookie(None)):
     if token:
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             permission = payload.get("permission")
             if permission == "user":
-                result = get_all_nhan_vien_controller()
+                result = get_all_nhan_vien_moi_controller()
+            return JSONResponse(status_code=200, content=result)
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
+
+
+@app.get("/get_employee_details/{id}")
+async def get_employee_details(id: int, token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                result = get_employee_details_controller(id)
+                if "error" in result:
+                    return JSONResponse(status_code=500, content=result)
                 return JSONResponse(status_code=200, content=result)
         except jwt.PyJWTError:
-            return RedirectResponse('/login')
-    return RedirectResponse('/login')
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
 
 
-@app.get('/get_chi_tiet_nhan_vien_by_id')
-async def get_chi_tiet_nhan_vien_by_id(id: int, token: str = Cookie(None)):
+@app.post("/update_employee/{id}")
+async def update_employee(id: int, updated_data: dict, token: str = Cookie(None)):
     if token:
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             permission = payload.get("permission")
             if permission == "user":
-                return JSONResponse(status_code=200, content=get_chi_tiet_nhan_vien_by_id(id))
+                result = update_employee_controller(id, updated_data)
+            if "error" in result:
+                return JSONResponse(status_code=500, content=result)
+            return JSONResponse(status_code=200, content={"message": "Update successful"})
         except jwt.PyJWTError:
-            return RedirectResponse('/login')
-    return RedirectResponse('/login')
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
+
+
+@app.delete("/delete_employee/{id}")
+async def delete_employee(id: int, token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                result = delete_employee_controller(id)
+            if "error" in result:
+                return JSONResponse(status_code=500, content=result)
+            return JSONResponse(status_code=200, content={"message": "Delete successful"})
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
+
+
+@app.post("/add_employee")
+async def add_employee_route(new_employee_data: dict, token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                result = add_employee_controller(new_employee_data)
+            if "error" in result:
+                return JSONResponse(status_code=500, content=result)
+            return JSONResponse(status_code=200, content=result)
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
+
+
+@app.get("/get_all_phong_ban")
+async def get_all_phong_ban_route(token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                result = get_all_phong_ban_controller()
+            return JSONResponse(status_code=200, content=result)
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+
+@app.get("/get_all_chuc_vu")
+async def get_all_chuc_vu_route(token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                result = get_all_chuc_vu_controller()
+            return JSONResponse(status_code=200, content=result)
+        except jwt.PyJWTError:
+            return RedirectResponse("/login")
+    return RedirectResponse("/login")
 
 
 @app.get('/giaoviec')

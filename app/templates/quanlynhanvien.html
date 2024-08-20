@@ -34,43 +34,350 @@
       </section>
 
       <!-- Main content -->
+      
+      <!-- Test -->
       <section class="col-lg-12 connectedSortable">
-        <!-- Map card -->
         <div class="card">
-          <div class="card-header border-0 rows">
-            <h3 class="card-title col-lg-7">
-              <i class="fa-solid fa-list-ol"></i>
-              Danh sách nhân viên
+          <div class="card-header border-0">
+            <h3 class="card-title">
+                <i class="fa-solid fa-list-ol"></i>
+                DANH SÁCH NHÂN VIÊN
             </h3>
+        <button class="btn btn-success float-right" id="addEmployeeButton">
+          THÊM NHÂN VIÊN
+        </button>
           </div>
-          <div class="card-body">
-            <table class="table table-bordered table-hover" id="bangnv">
-              <thead>
-                <tr>
-                  <th scope="col" style="text-align: center">
-                    <input type="checkbox" id="checkAll" />
-                  </th>
-                  <th scope="col" style="text-align: center">Id</th>
-                  <th scope="col" style="text-align: center">Id Thẻ</th>
-                  <th scope="col" style="text-align: center">Họ Tên</th>
-                  <!-- <th scope="col" style="text-align: center">Giới Tính</th>
-                  <th scope="col" style="text-align: center">Ngày Sinh</th> -->
-                  <th scope="col" style="text-align: center">Địa chỉ</th>
-                  <!-- <th scope="col" style="text-align: center">Điện thoại</th> -->
-                  <th scope="col" style="text-align: center">Email</th>
-                  <th scope="col" style="text-align: center">Phòng Ban</th>
-                  <th scope="col" style="text-align: center">Ca Làm Việc</th>
-                  <th scope="col" style="text-align: center">Trạng Thái</th>
-                  <th scope="col" style="text-align: center">Thao Tác Thẻ</th>
-                </tr>
-              </thead>
-              <tbody>
-              </tbody>
-            </table>
+        <div class="card-body">
+          <table class="table table-bordered table-hover display" id="dashboard_bangdsnv_moi">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">ID</th>
+                <th scope="col">ID Thẻ</th>
+                <th scope="col">Họ Tên</th>
+                <th scope="col">Giới tính</th>
+                <th scope="col">Chức vụ</th>
+                <th scope="col">Hệ Số Lương</th>
+                <th scope="col">Lương Cơ Bản</th>
+                <th scope="col">Trạng thái</th>
+                <th scope="col">Chức năng</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!--Xem TT Chi Tiết-->
+    <div
+      class="modal fade"
+      id="employeeDetailsModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">
+              CHI TIẾT NHÂN VIÊN
+            </h5>
+            <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+          <!-- Nội dung sẽ được cập nhật bởi JavaScript -->
+          </div>
+          <div class="modal-footer">
+            <button
+            type="button"
+            class="btn btn-secondary"
+            data-dismiss="modal"
+            >
+            Đóng
+            </button>
           </div>
         </div>
-        <!-- /.card -->
-      </section>
+      </div>
+    </div>
+
+
+    <!-- Chỉnh sửa Nhân Viên -->
+    <div
+    class="modal fade"
+    id="editEmployeeModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="editEmployeeModalLabel"
+    aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editEmployeeModalLabel">
+              CẬP NHẬT THÔNG TIN NHÂN VIÊN
+            </h5>
+            <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="editEmployeeForm">
+              <input type="hidden" id="employeeId" />
+              <div class="form-group">
+                <label for="employeeIdThe">ID Thẻ</label>
+                <input
+                type="text"
+                class="form-control"
+                id="employeeIdThe"
+                required
+                />
+              </div>
+              <div class="form-group">
+                <label for="employeeName">Họ Tên</label>
+                <input
+                type="text"
+                class="form-control"
+                id="employeeName"
+                required
+                />
+              </div>
+              <div class="form-group">
+                <label for="employeeGender">Giới tính</label>
+                <select
+                class="form-control"
+                id="employeeGender"
+                required>
+                  <option value="1">Nam</option>
+                  <option value="0">Nữ</option>
+                </select>
+              </div>
+              <!-- <div class="form-group">
+                <label for="employeeBirthday">Ngày sinh</label>
+                <input
+                type="date"
+                class="form-control"
+                id="employeeBirthday"
+                required
+                />
+              </div> -->
+              <div class="form-group">
+                <label for="employeeEmail">Email</label>
+                <input
+                type="email"
+                class="form-control"
+                id="employeeEmail"
+                required
+                />
+              </div>
+              <div class="form-group">
+                <label for="employeeAddress">Địa chỉ</label>
+                <input
+                type="text"
+                class="form-control"
+                id="employeeAddress"
+                required
+                />
+              </div>
+              <!-- <div class="form-group">
+                <label for="employeeDepartmens">Phòng ban</label>
+                <input
+                type="text"
+                class="form-control"
+                id="employeeDepartmens"
+                required
+                />
+              </div> -->
+              <div class="form-group">
+                <label for="employeePosition">Chức vụ</label>
+                <select
+                class="form-control"
+                id="employeePosition"
+                required
+                >
+                  <option value="1">Quản lý</option>
+                  <option value="2">Trưởng phòng</option>
+                  <option value="3">Nhân Viên</option>
+                </select>
+              </div>
+              <!-- <div class="form-group">
+                <label for="employeeSalaryCoefficient">Hệ số lương</label>
+                <input
+                  type=""
+                  class="form-control"
+                  id="employeeSalaryCoefficient"
+                  required
+                  step="0.01"
+                />
+              </div> -->
+              <div class="form-group">
+                <label for="employeeBasicSalary">Lương Cơ Bản</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="employeeBasicSalary"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="employeeStatus">Trạng thái</label>
+                <select
+                  class="form-control"
+                  id="employeeStatus"
+                  required
+                >
+                  <option value="1">Ðang làm việc</option>
+                  <option value="0">Nghỉ việc</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                Lưu thay đổi
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+          
+      
+    <!-- Thêm Nhân Viên -->
+    <div
+    class="modal fade"
+    id="addEmployeeModal"
+    tabindex="-1"
+    aria-labelledby="addEmployeeModalLabel"
+    aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addEmployeeModalLabel">
+              Thêm Nhân Viên Mới
+            </h5>
+            <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+            ></button>
+          </div>
+          <form id="addEmployeeForm">
+            <div class="modal-body">
+              <!-- Các trường nhập liệu -->
+              <div class="form-group">
+                <label for="employeeIdThe">ID Thẻ:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="employeeIdThe"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="newEmployeeDepartment">Phòng ban</label>
+                <select
+                id="newEmployeeDepartment"
+                class="form-control"
+                ></select>
+              </div>
+              <div class="form-group">
+                <label for="newEmployeeName">Họ tên:</label>
+                <input
+                type="text"
+                class="form-control"
+                id="newEmployeeName"
+                required
+                />
+              </div>
+              <div class="form-group">
+                <label for="newEmployeeGender">Giới tính</label>
+                <select id="newEmployeeGender" class="form-control">
+                  <option value="1">Nam</option>
+                  <option value="0">Nữ</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="newEmployeeBirthday">Ngày sinh</label>
+                <input
+                type="date"
+                class="form-control"
+                id="newEmployeeBirthday"
+                required
+                />
+              </div>
+              <div class="form-group">
+                <label for="newEmployeeAddress">Địa chỉ</label>
+                <input
+                type="text"
+                class="form-control"
+                id="newEmployeeAddress"
+                required
+                />
+              </div>
+              <div class="form-group">
+                <label for="newEmployeeEmail">Email</label>
+                <input
+                type="email"
+                class="form-control"
+                id="newEmployeeEmail"
+                required
+                />
+              </div>
+              <div class="form-group">
+                <label for="newEmployeePhone">Số Điện Thoại</label>
+                <input
+                type="text"
+                class="form-control"
+                id="newEmployeePhone"
+                required
+                />
+              </div>
+              
+              <div class="form-group">
+                <label for="newEmployeePosition">Chức vụ</label>
+                <select
+                  id="newEmployeePosition"
+                  class="form-control"
+                ></select>
+              </div>
+              <div class="form-group">
+                <label for="newEmployeeStatus">Trạng thái</label>
+                <select id="newEmployeeStatus" class="form-control">
+                  <option value="1">Đang làm việc</option>
+                  <option value="0">Nghỉ việc</option>
+                </select>
+              </div>
+              <div class="modal-footer">
+                <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+                >
+                Đóng
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  Lưu Nhân Viên
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+      <!-- Test -->
       <!-- /.content -->
     </div>
     <!-- /.content-wrapper -->

@@ -58,54 +58,182 @@ def verify_student(email: str, password: str):
         return e
     
 
-def get_all_nhan_vien():
+def get_all_nhan_vien_moi():
     try:
-        conn = create_connection()
-        cursor = conn.cursor()
         result = cursor.execute(
-            """
-            SELECT u.id, u.idthe, u.idpb, u.idclv, u.hoten, u.gioitinh, u.ngaysinh, u.diachi, u.dienthoai, u.email, u.trangthai
-            FROM usercty_spkt u
-            JOIN phanquyen_spkt pq ON u.id = pq.idu
-            ORDER BY u.id;
-            """
-        )
-        data = result.fetchall()
-        conn.close()
-        return [
-            {
-                "id": row.id,
-                "idthe": row.idthe,
-                "hoten": row.hoten,
-                # "gioitinh": "Nam" if row.gioitinh else "Nữ",
-                # "ngaysinh": row.ngaysinh.strftime("%d-%m-%Y"),
-                "diachi": row.diachi,
-                # "dienthoai": row.dienthoai,
-                "email": row.email,
-                "idpb": row.idpb,
-                "idclv": row.idclv,
-                "trangthai": "Đang hoạt động" if row.trangthai else "Ngừng hoạt động"
-            }
-            for row in data
+        """
+        SELECT u.id, u.idthe, u.hoten, u.gioitinh, vt.tenvt, vt.heso, vt.luongcb,
+        u.trangthai
+        FROM usercty_spkt u
+        LEFT JOIN phanquyen_spkt pq ON u.id = pq.idu
+        LEFT JOIN vaitro_spkt vt ON pq.idvt = vt.idvt
+        """
+        ).fetchall()
+        result_data = [
+        {
+        "id": i[0],
+        "idthe": i[1],
+        "hoten": i[2],
+        "gioitinh": i[3],
+        "tenvt": i[4],
+        "heso": i[5],
+        "luongcb": i[6],
+        "trangthai": i[7],
+        }
+        for i in result
         ]
+        return result_data
     except Exception as e:
-        print(f"Error: {e}")
-        return []
+        print("Error: ", e)
+        return {"error": str(e)}
     
-    
-def get_phan_quyen_by_username(idu: int):
+
+def get_employee_details_controller(id: int):
     try:
-        i = cursor.execute("EXEC Getphanquyen_spkt?", idu).fetchone()
-        return {'idu': i[0], 'idvt': i[1], 'trangthai': i[2], 'ghichu': i[3]}
+        result = cursor.execute(
+        """
+        SELECT u.id, u.idthe, u.hoten, u.gioitinh, u.email, u.diachi, u.ngaysinh, u.dienthoai,
+        pb.tenpb, vt.tenvt, vt.heso, vt.luongcb, u.trangthai
+        FROM usercty_spkt u
+        LEFT JOIN phanquyen_spkt pq ON u.id = pq.idu
+        LEFT JOIN vaitro_spkt vt ON pq.idvt = vt.idvt
+        LEFT JOIN phongban_spkt pb ON u.idpb = pb.idpb
+        WHERE u.id = ?
+        """,
+        (id,),
+        ).fetchone()
+        if result:
+            return {
+                "id": result[0],
+                "idthe": result[1],
+                "hoten": result[2],
+                "gioitinh": result[3],
+                "email": result[4],
+                "diachi": result[5],
+                "ngaysinh": (result[6].strftime("%d-%m-%Y") if result[6] else None),
+                "dienthoai": result[7],
+                "tenpb": result[8],
+                "tenvt": result[9],
+                "heso": result[10],  # Hệ số lương
+                "luongcb": result[11],  # Lương cơ bản
+                "trangthai": result[12],
+            }
+        else:
+            return {"error": "Employee not found"}
     except Exception as e:
-        return e
+        print("Error: ", e)
+        return {"error": str(e)}
     
-def get_chi_tiet_nhan_vien_by_id(id: int):
+    
+def update_employee_controller(id: int, updated_data: dict):
     try:
-        result = cursor.execute("EXEC Getusercty_spkt ?", id)
-        return result.fetchone()
+        cursor.execute(
+        """
+        UPDATE usercty_spkt
+        SET idthe = ?, hoten = ?, gioitinh = ?, email = ?, diachi = ?, trangthai = ?
+        WHERE id = ?
+        """,
+        (
+            updated_data["idthe"],
+            updated_data["hoten"],
+            updated_data["gioitinh"],
+            updated_data["email"],
+            updated_data["diachi"],
+            updated_data["trangthai"],
+            id,
+        ),
+        )
+        cursor.execute(
+            """
+            UPDATE phanquyen_spkt
+            SET idvt = ?
+            WHERE idu = ?
+            """,
+            (
+            updated_data["idvt"],
+            id,
+            ),
+        )
+        conn.commit()
+        return {"message": "Update successful"}
     except Exception as e:
-        return e
+        print("Error during update: ", e)
+        return {"error": str(e)}
+    
+
+
+def delete_employee_controller(id: int):
+    try:
+        cursor.execute("DELETE FROM usercty_spkt WHERE id = ?", (id,))
+        conn.commit()
+        return {"message": "Delete successful"}
+    except Exception as e:
+        print("Error: ", e)
+        return {"error": str(e)}
+        
+    
+
+    
+def add_employee_via_procedure(new_employee_data):
+    try:
+        required_fields = [
+            "idthe",
+            "idpb",
+            "hoten",
+            "gioitinh",
+            "ngaysinh",
+            "diachi",
+            "dienthoai",
+            "email",
+            "idvt",
+            "trangthai",
+        ]
+        for field in required_fields:
+            if not new_employee_data.get(field):
+                raise ValueError(f"Field {field} is missing or empty.")
+        cursor.execute(
+            """
+            EXEC AddU_spkt @idthe=?, @idpb=?, @idclv=?, @HoTen=?, @GioiTinh=?,
+            @NgaySinh=?, @DiaChi=?, @SDT=?, @Email=?
+            """,
+            new_employee_data["idthe"],
+            new_employee_data["idpb"],
+            new_employee_data["idclv"],
+            new_employee_data["hoten"],
+            new_employee_data["gioitinh"],
+            new_employee_data["ngaysinh"],
+            new_employee_data["diachi"],
+            new_employee_data["sdt"],
+            new_employee_data["email"],
+            new_employee_data["trangthai"],
+        )
+        result = cursor.fetchone()
+        conn.commit()
+        if result and result.Result > 0:
+            return {"message": "Employee added successfully"}
+        else:
+            return {"error": "Employee already exists or failed to add"}
+    except Exception as e:
+        print("Error during add employee via procedure: ", e)
+        return {"error": str(e)}
+    
+    
+def get_all_chuc_vu():
+    try:
+        result = cursor.execute("SELECT idvt, tenvt FROM vaitro_spkt").fetchall()
+        return [{"idvt": i[0], "tenvt": i[1]} for i in result]
+    except Exception as e:
+        print("Error: ", e)
+        return {"error": str(e)}
+    
+
+def get_all_phong_ban():
+    try:
+        result = cursor.execute("SELECT idpb, tenpb FROM phongban_spkt").fetchall()
+        return [{"idpb": i[0], "tenpb": i[1]} for i in result]
+    except Exception as e:
+        print("Error: ", e)
+        return {"error": str(e)}
     
 
 def count_all_sinh_vien():

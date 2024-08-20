@@ -9,12 +9,18 @@ from ..config import default_password, secret_key, algorithm
 #     return result
 
 
-def get_all_nhan_vien_controller():
-    return get_all_nhan_vien() 
+def get_all_nhan_vien_moi_controller():
+    return get_all_nhan_vien_moi()
 
+def add_employee_controller(new_employee_data):
+    return add_employee_via_procedure(new_employee_data)
+    
 
-def get_chi_tiet_nhan_vien_by_id_controller(id: int):
-    return get_chi_tiet_nhan_vien_by_id(id)
+def get_all_phong_ban_controller():
+    return get_all_phong_ban()
+
+def get_all_chuc_vu_controller():
+    return get_all_chuc_vu()
 
 
 def count_all_sinh_vien_controller():
