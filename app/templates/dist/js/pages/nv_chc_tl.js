@@ -1,3 +1,5 @@
+// import { saveAs } from "file-saver";
+
 var Toast = Swal.mixin({
   toast: true,
   position: "top-end",
@@ -350,6 +352,7 @@ function load_Bangluong(mode=0) {
     },
   });
 }
+
 function XuatBangExcel( ){
   var table = document.getElementById('bangtamluong');
   
@@ -361,6 +364,383 @@ function XuatBangExcel( ){
   
   // --------------------------------------------------------------------
   
+}
+
+async function XuatFdoc(){
+  // const { Document, Packer, Paragraph, Table, TableCell, TableRow, TextRun, WidthType, BorderStyle } = docx;
+
+  let hoten=$('#table_info_lt_hoten').text();
+  let cv=$('#table_info_lt_cv').text();
+  let hsl=$('#table_info_lt_hsl').text();
+  let lcb=$('#table_info_lt_lcb').text();
+  let tre=$('#table_info_lt_tre').text();
+  let som=$('#table_info_lt_som').text();
+  let vang=$('#table_info_lt_vang').text();
+  let du=$('#table_info_lt_du').text();
+  let luong=$('#table_info_lt_luong').text();
+  let date=$('#table_info_lt_date').text();
+  let thl=$('#table_info_lt_thl').text();
+  let nl=$('#table_info_lt_nl').text();
+  let nx=new Date();
+  const nxf = nx.toLocaleDateString('en-GB');
+
+  const table = new docx.Table({
+    rows: [
+        new docx.TableRow({
+            children: [
+                new docx.TableCell({
+                    children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: "Họ tên: ",
+                            size: 30, 
+                        }),
+                    ], 
+                      alignment: docx.AlignmentType.CENTER,
+                      
+                    })],
+                }),
+                new docx.TableCell({
+                    children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: `${hoten}`,
+                            size: 30, 
+                        }),
+                    ], 
+                      alignment: docx.AlignmentType.CENTER,
+                      
+                    })],
+                }),
+            ],
+        }),
+        new docx.TableRow({
+            children: [
+                new docx.TableCell({
+                    children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: "Chức vụ: ",
+                            size: 30, 
+                        }),
+                    ], 
+                      alignment: docx.AlignmentType.CENTER,
+                      
+                    })],
+                }),
+                new docx.TableCell({
+                    children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: `${cv}`,
+                            size: 30, 
+                        }),
+                    ], 
+                      alignment: docx.AlignmentType.CENTER,
+                      
+                    })],
+                }),
+            ],
+        }),
+        new docx.TableRow({
+          children: [
+              new docx.TableCell({
+                  children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: "Hệ số lương",
+                            size: 30, 
+                        }),
+                    ], 
+                    alignment: docx.AlignmentType.CENTER,
+                    
+                  })],
+              }),
+              new docx.TableCell({
+                  children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: `${hsl}`,
+                            size: 30, 
+                        }),
+                    ], 
+                    alignment: docx.AlignmentType.CENTER,
+                    
+                  })],
+              }),
+          ],
+        }),
+        new docx.TableRow({
+          children: [
+              new docx.TableCell({
+                  children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: "Lương cơ bản",
+                            size: 30, 
+                        }),
+                    ], 
+                    alignment: docx.AlignmentType.CENTER,
+                    
+                  })],
+              }),
+              new docx.TableCell({
+                  children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: `${lcb}`,
+                            size: 30, 
+                        }),
+                    ], 
+                    alignment: docx.AlignmentType.CENTER,
+                   
+                  })],
+              }),
+          ],
+        }),
+        new docx.TableRow({
+          children: [
+              new docx.TableCell({
+                  children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: "Số lượt di trễ: ",
+                            size: 30, 
+                        }),
+                    ], 
+                    alignment: docx.AlignmentType.CENTER,
+                    
+                  })],
+              }),
+              new docx.TableCell({
+                  children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: `${tre}`,
+                            size: 30, 
+                        }),
+                    ], 
+                    alignment: docx.AlignmentType.CENTER,
+                   
+                  })],
+              }),
+          ],
+        }),
+        new docx.TableRow({
+          children: [
+              new docx.TableCell({
+                  children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: "Số lượt về sớm: ",
+                            size: 30, 
+                        }),
+                    ], 
+                    alignment: docx.AlignmentType.CENTER,
+                    
+                  })],
+              }),
+              new docx.TableCell({
+                  children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: `${som}`,
+                            size: 30, 
+                        }),
+                    ], 
+                    alignment: docx.AlignmentType.CENTER,
+                    
+                  })],
+              }),
+          ],
+        }),
+        new docx.TableRow({
+          children: [
+              new docx.TableCell({
+                  children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: "Số lượt vắng: ",
+                            size: 30, 
+                        }),
+                    ], 
+                    alignment: docx.AlignmentType.CENTER,
+                    
+                  })],
+              }),
+              new docx.TableCell({
+                  children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: `${vang}`,
+                            size: 30, 
+                        }),
+                    ], 
+                    alignment: docx.AlignmentType.CENTER,
+                    
+                  })],
+              }),
+          ],
+        }),
+        new docx.TableRow({
+          children: [
+              new docx.TableCell({
+                  children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: "Số ngày công dư: ",
+                            size: 30, 
+                        }),
+                    ], 
+                    alignment: docx.AlignmentType.CENTER,
+                    
+                  })],
+              }),
+              new docx.TableCell({
+                  children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: `${du}`,
+                            size: 30, 
+                        }),
+                    ], 
+                    alignment: docx.AlignmentType.CENTER,
+                  
+                  })],
+              }),
+          ],
+        }),
+        new docx.TableRow({
+          children: [
+              new docx.TableCell({
+                  children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: "Lương tạm thời: ",
+                            size: 30, 
+                        }),
+                    ], 
+                    alignment: docx.AlignmentType.CENTER,
+                   
+                  })],
+              }),
+              new docx.TableCell({
+                  children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: `${luong}`,
+                            size: 30, 
+                        }),
+                    ], 
+                    alignment: docx.AlignmentType.CENTER,
+                    
+                  })],
+              }),
+          ],
+        }),
+        new docx.TableRow({
+          children: [
+              new docx.TableCell({
+                  children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: "Lương tháng: ",
+                            size: 30, 
+                        }),
+                    ], 
+                    alignment: docx.AlignmentType.CENTER,
+                    
+                  })],
+              }),
+              new docx.TableCell({
+                  children: [new docx.Paragraph({children: [
+                        new docx.TextRun({
+                            text: `${thl}/${nl}` ,
+                            size: 30, 
+                        }),
+                    ],
+                    alignment: docx.AlignmentType.CENTER,
+                    
+                  })],
+              }),
+          ],
+        }),
+        // Thêm 8 hàng nữa tương tự
+        // ...
+    ],
+    width: {
+        size: 100,
+        type: docx.WidthType.PERCENTAGE,
+    },
+    borders: {
+        top: { style: docx.BorderStyle.SINGLE, size: 1, space: 0 },
+        bottom: { style: docx.BorderStyle.SINGLE, size: 1, space: 0 },
+        left: { style: docx.BorderStyle.SINGLE, size: 1, space: 0 },
+        right: { style: docx.BorderStyle.SINGLE, size: 1, space: 0 },
+        insideHorizontal: { style: docx.BorderStyle.SINGLE, size: 0.5, space: 0  },
+        insideVertical: { style: docx.BorderStyle.NONE },
+    },
+});
+
+
+    const doc = new docx.Document({
+      styles: {
+        default: new docx.Style({
+            paragraph: {
+                alignment: docx.AlignmentType.CENTER,
+                spacing: { before: 200, after: 200 },
+            },
+            run: {
+                font: {
+                    name: "Arial", // Font chữ mặc định
+                    size: 24, // Kích thước chữ mặc định (24 điểm)
+                },
+                color: "000000", // Màu chữ mặc định (đen)
+            },
+        }),
+      },
+        sections: [
+            {
+              headers: {
+                default: new docx.Header({
+                    children: [
+                        new docx.Paragraph({
+                          alignment: docx.AlignmentType.CENTER,
+                            children: [
+                                new docx.TextRun({
+                                    text: "BẢNG LƯƠNG TẠM",
+                                    bold: true,
+                                    size: 24, 
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+              },
+                children: [
+                    new docx.Paragraph({
+                        calignment: docx.AlignmentType.LEFT,
+                        children: [
+                          new docx.TextRun({
+                                text: `Ngày cập nhật: ${date}`,
+                                size: 30,
+                            }),
+                        ],
+                      }),
+                    new docx.Paragraph({
+                      alignment: docx.AlignmentType.LEFT,
+                      children: [
+                        new docx.TextRun({
+                                text: `Ngày xuất tài liệu: ${nxf}`,
+                                size: 30,
+                            }),
+                        ],
+                    }),
+                    
+                    new docx.Paragraph({
+                      alignment: docx.AlignmentType.LEFT,
+                      children: [
+                        new docx.TextRun({
+                                text: ` `,
+                                size: 30,
+                            }),
+                        ],
+                    }),
+                    
+                    table
+                    
+                ],
+                
+            },
+        ],
+    });
+
+    // Chuyển đổi tài liệu thành blob
+    const blob = await docx.Packer.toBlob(doc);
+    
+    // Lưu tài liệu bằng FileSaver
+    saveAs(blob, "BangTamLuong.docx");
 }
 // DX_10/8:303
 
@@ -462,6 +842,6 @@ $(document).on('click', '#CT_l', function(){
 });
 
 $(document).on('click', '#Efile', function(){
-  XuatBangExcel();
+  XuatFdoc();
 });
   
