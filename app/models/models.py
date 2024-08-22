@@ -4,6 +4,7 @@ from ..send_otp import is_otp_valid
 import datetime
 import bleach
 import json
+from datetime import time
 
 conn = create_connection()
 cursor = conn.cursor()
@@ -1602,3 +1603,63 @@ def xoa_bieu_mau_by_id(id: int):
         return True
     except Exception as e:
         return e
+
+
+def serialize_time(time_obj):
+    return time_obj.strftime('%H:%M:%S') if isinstance(time_obj, time) else time_obj
+
+def get_ds_cham_cong(thang: int, nam: int):
+    try:
+        query = "EXEC GetAllCHC_ByThangNam_spkt ?, ?"
+        result = cursor.execute(query, (thang, nam)).fetchall()
+        data = [{'idcc': i[0],
+                 'idu': i[1],
+                 'hoten': i[2],
+                 'ngaythang': i[3],
+                 'giovao': serialize_time(i[4]),
+                 'tre': i[5],
+                 'giora': serialize_time(i[6]),
+                 'som': i[7],
+                 'hople': i[8]}
+                for i in result]
+        return data
+    except Exception as e:
+        return str(e)
+
+
+def get_cham_cong_by_idu_thang_nam(idu: int, thang: int, nam: int):
+    try:
+        query = "EXEC GetCHCU_thang_spkt ?, ?, ?"
+        result = cursor.execute(query, (idu, thang, nam)).fetchall()
+        data = [{'idcc': i[0],
+                 'idu': i[1],
+                 'hoten': i[2],
+                 'ngaythang': i[3],
+                 'giovao': serialize_time(i[4]),
+                 'tre': i[5],
+                 'giora': serialize_time(i[6]),
+                 'som': i[7],
+                 'hople': i[8]}
+                for i in result]
+        return data
+    except Exception as e:
+        print(f"Error in get_cham_cong_by_idu_thang_nam: {str(e)}")
+        return {"error": str(e)}
+    
+def get_all_nhan_vien():
+    try:
+        query = """
+        SELECT DISTINCT usercty_spkt.id, usercty_spkt.hoten
+        FROM usercty_spkt
+        INNER JOIN chamcong_spkt ON usercty_spkt.id = chamcong_spkt.idu
+        """
+        result = cursor.execute(query).fetchall()
+        
+        # Formatting the result into a list of dictionaries
+        data = [{'id': row[0], 'hoten': row[1]} 
+                for row in result]
+        return data
+    except Exception as e:
+        return str(e)
+    
+    

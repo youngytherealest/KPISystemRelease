@@ -604,3 +604,16 @@ def get_chi_tiet_bieu_mau_by_id_controller(id: int):
 
 def xoa_bieu_mau_by_id_controller(id: int):
     return xoa_bieu_mau_by_id(id)
+
+
+def get_ds_cham_cong_controller(thang: int, nam: int):
+    return get_ds_cham_cong(thang,nam)
+
+
+def get_cham_cong_by_idu_thang_nam_controller(idu: int, thang: int, nam: int):
+    if idu == -1:
+        return get_ds_cham_cong(thang,nam)  # New function to get all attendance records
+    return get_cham_cong_by_idu_thang_nam(idu,thang,nam)
+
+def get_all_nhan_vien_controller():
+    return get_all_nhan_vien()

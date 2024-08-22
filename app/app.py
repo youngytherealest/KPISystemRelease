@@ -11,7 +11,7 @@ from hashlib import sha3_256
 from typing import List
 
 from .controllers.controller import *
-from .send_otp import send_otp_email, is_otp_valid
+from .send_otp import  is_otp_valid
 from .send_telegram_message import sendMessageTelegram, admin_chat_id
 
 import os
@@ -22,6 +22,7 @@ import zipfile
 import shutil
 import asyncio
 import json
+import time
 
 app = FastAPI()
 app.add_middleware(
@@ -1359,7 +1360,7 @@ async def thong_tin_sinh_vien_route(sv: ThongTinSV):
     result = insert_sinh_vien_controller(
         sv.mssv, sv.hoten, sv.gioitinh, sv.sdt, sv.email, sv.diachi, sv.malop, sv.truong, sv.nganh, sv.khoa, sha3_256(bytes(default_password, 'utf-8')).hexdigest())
     if result:
-        sent = send_otp_email(sv.email, sv.hoten)
+        sent = ''
         if sent:
             insert_taikhoan = insert_taikhoan_sinhvien_controller(
                 result, sha3_256(bytes(default_password, 'utf-8')).hexdigest(), 1)
@@ -1544,7 +1545,7 @@ async def gui_mail_otp(email: str):
         hoten = get_ho_ten_sv_by_email_controller(email)
         ngayHetHan = check_sv_con_han_thuc_tap(email)
         if (True):
-            send_otp_email(email, hoten)
+            # send_otp_email(email, hoten)
             return JSONResponse(status_code=200, content={'status': 'OK'})
         else:
             return JSONResponse(status_code=200, content={'status': 'Expired'})
@@ -3013,3 +3014,62 @@ async def get_ds_chuc_nang_by_user_id_route(token: str = Cookie(None)):
         except jwt.PyJWTError:
             return RedirectResponse('/login')
     return RedirectResponse('/login')
+
+
+@app.get('/quanlychamcong')
+async def quanlychamcong(request: Request, token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            uid = payload.get("id")
+            if permission == "user" and check_role(uid, '/quanlychamcong'):
+                return templates.TemplateResponse('quanlychamcong.html', context={'request': request})
+
+        except jwt.PyJWTError:
+            return RedirectResponse('/login')
+    return RedirectResponse('/login')
+
+@app.get('/get_ds_cham_cong')
+async def get_ds_cham_cong_route(thang: int, nam: int, token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                result = get_ds_cham_cong_controller(thang, nam)
+                return JSONResponse(status_code=200, content=result)
+        except jwt.PyJWTError:
+            return RedirectResponse('/login')
+    return RedirectResponse('/login')
+
+
+@app.get('/get_cham_cong_by_idu_thang_nam')
+async def get_cham_cong_by_idu_thang_nam_route(idu: int, thang: int, nam: int, token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                data = get_cham_cong_by_idu_thang_nam_controller(idu, thang, nam)
+                return JSONResponse(status_code=200, content=data)
+        except jwt.PyJWTError:
+            return JSONResponse(status_code=401, content={"error": "Unauthorized"})
+        except Exception as e:
+            return JSONResponse(status_code=500, content={"error": str(e)})
+    return JSONResponse(status_code=401, content={"error": "Unauthorized"})
+
+@app.get('/get_all_nhan_vien')
+async def get_all_nhan_vien(token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            if permission == "user":
+                data = get_all_nhan_vien_controller()
+                return JSONResponse(status_code=200, content=data)
+        except jwt.PyJWTError:
+            return JSONResponse(status_code=401, content={"error": "Unauthorized"})
+        except Exception as e:
+            return JSONResponse(status_code=500, content={"error": str(e)})
+    return JSONResponse(status_code=401, content={"error": "Unauthorized"})
