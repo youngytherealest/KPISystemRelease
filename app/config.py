@@ -5,6 +5,8 @@ from redis import Redis
 import pyodbc
 import os
 
+
+
 dotenv_path = Path('.env')
 load_dotenv(dotenv_path=dotenv_path)
 
@@ -41,3 +43,4 @@ def create_connection():
         return conn
     finally:
         return conn
+
