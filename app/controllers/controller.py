@@ -1,9 +1,124 @@
+from cgitb import text
 from ..models.models import *
 from ..utils.create_pdf import *
 
 from ..config import default_password, secret_key, algorithm
 
+# Code lấy dữ liệu từ csdl sử dụng cho quản lý lương tạm thời
+import pyodbc # type: ignore
+import pandas as pd # type: ignore
+from typing import List
 
+
+
+#  Quản lý tài khoản
+from hashlib import sha3_256
+
+
+
+
+# Quản lý bảng lương tạm thời (gọi hàm và trả về kết quả)
+
+def get_user_rules_controller():
+    return get_user_roles()
+
+def get_user_rules_by_id_controller(id):
+    return get_user_roles_by_id(id)
+
+def get_tsvu_controller(IDU, Thang, Nam):
+    return get_tsvu(IDU, Thang, Nam)
+
+#Lấy số lần đi trễ, về sớm, vắng
+# def get_late_early_absent_counts(user_id, month, year):
+#     conn = create_connection().connect()
+#     query = text("""
+#         EXEC GetTSVU_thang_spkt :IDU, :Thang, :Nam
+#     """)
+#     result = conn.execute(query, IDU=user_id, Thang=month, Nam=year).fetchone()
+#     conn.close()
+#     return {
+#         "t": result['Tre'],
+#         "s": result['Som'],
+#         "v": result['Vang'],
+#         "d": result['Du']
+#     }
+# Lưu thông tin một nhân viên
+def save_tsvu_controller(id, idthe, hoten, tenvt, heso, luongcb, tre, som, vang, du, luongtamthoi, ngayluu, thang, year):
+    try:
+        rs = save_tsvu(
+            id,
+            idthe,
+            hoten,
+            tenvt,
+            heso,
+            luongcb,
+            tre,
+            som,
+            vang,
+            du,
+            luongtamthoi,
+            ngayluu,
+            thang,
+            year
+        )
+        return rs
+    except Exception as e:
+        print(f"Error in save_tsvu_controller: {e}")
+        return False
+    
+# Lưu thông tin nhiều nhân viên
+def get_all_employees_controller(month: int, year: int):
+    try:
+        return get_all_employees(month, year)
+    except Exception as e:
+        print(f"Error in get_all_employees_controller: {e}")
+        return []
+
+
+
+# Quản lý tài khoản
+def delete_tk_by_id_controller(id: int):
+    return delete_tk_by_id(id)
+
+def ban_account_by_id_controller(idtk: int):
+    return ban_account_by_id(idtk)
+
+def unban_account_by_id_controller(idtk: int):
+    return unban_account_by_id(idtk)
+
+def verify_password(idtk: int, current_password: str):
+    try:
+        cursor.execute("SELECT mk FROM taikhoan_spkt WHERE idtk = ?", idtk)
+        stored_password = cursor.fetchone()
+        if stored_password and sha3_256(bytes(current_password, 'utf-8')).hexdigest() == stored_password[0]:
+            return True
+        return False
+    except Exception as e:
+        return False
+
+
+def change_password_controller(idtk: int, new_password: str):
+    hashed_password = sha3_256(bytes(new_password, 'utf-8')).hexdigest()
+    return update_password_by_id(idtk, hashed_password)
+
+
+def get_ds_tai_khoan_controller():
+    return get_ds_tai_khoan()
+
+# Code lấy thông tin chi tiết nhân viên
+def get_tai_khoan_by_id_controller(idtk):
+    return get_tai_khoan_by_id(idtk)
+
+
+# Code thêm tài khoản _ quản lý tài khoản spkt
+def add_account_controller(idnv: int, tk: str, mk: str):
+    return add_account(idnv, tk, mk)
+
+
+
+
+
+#Code cũ của src cũ
 def insert_sinh_vien_controller(MSSV, HoTen: str, GioiTinh: int, SDT: str, Email: str, DiaChi: str, MaLop: str, Truong: int, Nganh: int, Khoa: int, Password: str) -> bool:
     result = insert_sinh_vien(MSSV, HoTen, GioiTinh,
                               SDT, Email, DiaChi, MaLop, Truong, Nganh, Khoa, Password)
@@ -335,11 +450,6 @@ def update_password_sv_controller(email: str, old_password: str, new_password: s
 
 def get_phan_quyen_controller(username: str):
     return get_phan_quyen(username)
-
-
-def get_ds_tai_khoan_controller():
-    return get_ds_tai_khoan()
-
 
 def update_xoa_nguoi_huong_dan_by_id_controller(id: int):
     return update_xoa_nguoi_huong_dan_by_id(id)
