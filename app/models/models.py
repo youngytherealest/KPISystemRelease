@@ -4,6 +4,9 @@ from ..send_otp import is_otp_valid
 import datetime
 import bleach
 import json
+# thư viên qltk
+import logging
+from datetime import datetime
 
 conn = create_connection()
 cursor = conn.cursor()
@@ -76,6 +79,265 @@ def count_all_sinh_vien():
         return result.fetchone()[0]
     except Exception as e:
         return e
+
+
+
+
+
+
+# Quản lý thông tin tài khoản
+def get_ds_tai_khoan():
+    try:
+        # Thực hiện câu lệnh SELECT để lấy dữ liệu từ các bảng 'taikhoan_spkt', 'usercty_spkt', 'phanquyen_spkt', và 'vaitro_spkt'
+        query = """
+        SELECT 
+            t.idtk, 
+            t.idu, 
+            t.tk, 
+            t.mk, 
+            t.ngaytao, 
+            t.ngaycapnhat, 
+            t.trangthai AS trangthai_tk,
+            u.hoten, 
+            u.gioitinh, 
+            u.ngaysinh, 
+            u.diachi, 
+            u.dienthoai, 
+            u.email, 
+            u.trangthai AS trangthai_user,
+            pq.idvt,
+            vt.tenvt
+        FROM 
+            taikhoan_spkt t
+        JOIN 
+            usercty_spkt u ON t.idu = u.id
+        LEFT JOIN 
+            phanquyen_spkt pq ON u.id = pq.idu
+        LEFT JOIN 
+            vaitro_spkt vt ON pq.idvt = vt.idvt
+        """
+
+        result = cursor.execute(query).fetchall()
+
+        # Chuyển kết quả thành danh sách các từ điển
+        accounts = [
+            {
+                'idtk': row[0],
+                'idu': row[1],
+                'tk': row[2],
+                'mk': row[3],
+                'ngaytao': row[4],
+                'ngaycapnhat': row[5],
+                'trangthai_tk': row[6],
+                'hoten': row[7],
+                'gioitinh': row[8],
+                'ngaysinh': row[9],
+                'diachi': row[10],
+                'dienthoai': row[11],
+                'email': row[12],
+                'trangthai_user': row[13],
+                'idvt': row[14],  # Role ID
+                'tenvt': row[15]   # Role name
+            }
+            for row in result
+        ]
+
+        return accounts
+    except Exception as e:
+        return str(e)
+
+# Xóa tài khoản_spkt
+def delete_tk_by_id(id: int):
+    try:
+        result = cursor.execute("EXEC DeleteTK_spkt ?", id).fetchone()
+        cursor.commit()
+        return result[0]
+    except Exception as e:
+        return str(e)
+    
+# Đổi mật khẩu tài khoản_spkt
+# def update_password_tk(id: int, old_password: str, new_password: str):
+#     try:
+#         tght= datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+#         # f_tght = f"'{tght}'"
+#         result = cursor.execute("ChangePassTK_spkt ?, ?, ?, ?", id, protect_xss(old_password), protect_xss(new_password), tght)
+#         kq = result.fetchone()[0]
+#         conn.commit()
+#         return kq
+#     except Exception as e:
+#         return e
+
+# Reset mật khẩu tài khoản
+def reset_password_tk(id: int):
+    try:
+        tght= datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+#        # f_tght = f"'{tght}'"
+        result = cursor.execute("ResetPasswordTK_spkt ?, ?", id, tght)
+        kq = result.fetchone()[0]
+        conn.commit()
+        return kq
+    except Exception as e:
+        return e
+
+
+    
+# Code khóa và kích hoạt tài khoản _ quản lý tài khoản _ spkt   
+def ban_account_by_id(idtk: int):
+    try:
+        # Thực hiện stored procedure
+        cursor.execute("EXEC BanAccountByID_spkt @idtk = ?", idtk)
+        conn.commit()
+        # Lấy số dòng bị ảnh hưởng
+        affected_rows = cursor.execute("SELECT @@ROWCOUNT").fetchone()
+        return affected_rows[0]
+    except Exception as e:
+        conn.rollback()
+        return str(e)
+
+def unban_account_by_id(idtk: int):
+    try:
+        # Thực hiện stored procedure
+        cursor.execute("EXEC UnBanAccountByID_spkt @idtk = ?", idtk)
+        conn.commit()
+        # Lấy số dòng bị ảnh hưởng
+        affected_rows = cursor.execute("SELECT @@ROWCOUNT").fetchone()
+        return affected_rows[0]
+    except Exception as e:
+        conn.rollback()
+        return str(e)
+
+# Thêm tài khoản
+# def add_account(idnv: int, tk: str, mk: str, ngayt: str):
+#     try:
+#         # Thực hiện stored procedure
+#         cursor.execute("EXEC AddTK_spkt @IDU = ?, @TK = ?, @Password = ?, @ngayt = ?", idnv, tk, mk, ngayt)
+#         conn.commit()
+
+#         # Lấy số dòng bị ảnh hưởng từ kết quả trả về của stored procedure
+#         affected_rows = cursor.fetchone()
+        
+#         # Nếu affected_rows không phải là None và lớn hơn 0, nghĩa là thêm thành công
+#         if affected_rows and affected_rows[0] > 0:
+#             return "OK"
+#         else:
+#             return "EXISTS"  # Tài khoản có thể đã tồn tại hoặc không thể thêm
+
+#     except Exception as e:
+#         conn.rollback()
+#         return str(e)
+
+
+# Code lấy thông tin chi tiết_spkt
+def get_tai_khoan_by_id(idtk):
+    try:
+        query = """
+        SELECT 
+            t.idtk, 
+            t.tk, 
+            t.ngaytao, 
+            t.ngaycapnhat, 
+            t.trangthai AS trangthai_tk,
+            u.hoten, 
+            u.gioitinh, 
+            u.ngaysinh, 
+            u.diachi, 
+            u.dienthoai, 
+            u.email, 
+            u.trangthai AS trangthai_user,
+            vt.tenvt
+        FROM 
+            taikhoan_spkt t
+        JOIN 
+            usercty_spkt u ON t.idu = u.id
+        LEFT JOIN 
+            phanquyen_spkt pq ON u.id = pq.idu
+        LEFT JOIN 
+            vaitro_spkt vt ON pq.idvt = vt.idvt
+        WHERE 
+            t.idtk = ?
+        """
+        result = cursor.execute(query, (idtk,)).fetchone()
+
+        if result:
+            account = {
+                'idtk': result[0],
+                'tk': result[1],
+                'ngaytao': result[2],
+                'ngaycapnhat': result[3],
+                'trangthai_tk': result[4],
+                'hoten': result[5],
+                'gioitinh': result[6],
+                'ngaysinh': result[7],
+                'diachi': result[8],
+                'dienthoai': result[9],
+                'email': result[10],
+                'trangthai_user': result[11],
+                'tenvt': result[12],
+            }
+            return account
+        else:
+            return None
+    except Exception as e:
+        return str(e)
+
+
+
+#Thêm taikhoan_spkt
+import hashlib
+
+
+def lay_nv_khong_co_tk():
+    try:
+        query = """
+        SELECT id, hoten
+        FROM usercty_spkt
+        WHERE id NOT IN (SELECT idu FROM taikhoan_spkt)
+        """
+        cursor.execute(query)
+        result = cursor.fetchall()
+        return [{"idnv": row[0], "tennv": row[1]} for row in result]
+    except Exception as e:
+        print(f"Error fetching employees: {str(e)}")
+        return None
+
+
+
+def add_account(idnv: int, tk: str):
+    try:
+        # Lấy thời gian hiện tại
+        tght = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        # Gọi thủ tục để thêm tài khoản, mật khẩu được tạo sẵn trong SQL
+        cursor.execute("EXEC AddTK_spkt @IDU = ?, @TK = ?, @ngayt = ?", idnv, tk, tght)
+        conn.commit()
+
+        affected_rows = cursor.rowcount
+
+        if affected_rows == 1:
+            return "OK"
+        else:
+            return "EXISTS"
+    except Exception as e:
+        conn.rollback()
+        return str(e)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def ti_le_sinh_vien_da_danh_gia():
@@ -871,12 +1133,12 @@ def get_phan_quyen(username: str):
         return e
 
 
-def get_ds_tai_khoan():
-    try:
-        result = cursor.execute("EXEC GetDSTaiKhoanNguoiHuongDan").fetchall()
-        return [{'id': i[0], 'hoten': i[1], 'username': i[2], 'email': i[3], 'role': i[4], 'trangthai': i[5], 'tenvaitro': i[6]} for i in result]
-    except Exception as e:
-        return e
+# def get_ds_tai_khoan():
+#     try:
+#         result = cursor.execute("EXEC GetDSTaiKhoanNguoiHuongDan").fetchall()
+#         return [{'id': i[0], 'hoten': i[1], 'username': i[2], 'email': i[3], 'role': i[4], 'trangthai': i[5], 'tenvaitro': i[6]} for i in result]
+#     except Exception as e:
+#         return e
 
 
 def update_xoa_nguoi_huong_dan_by_id(id: int):

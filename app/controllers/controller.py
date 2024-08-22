@@ -1,9 +1,75 @@
+from cgitb import text
 from ..models.models import *
 from ..utils.create_pdf import *
 
 from ..config import default_password, secret_key, algorithm
 
+# Code lấy dữ liệu từ csdl sử dụng cho quản lý lương tạm thời
+import pyodbc
+import pandas as pd
+from typing import List
 
+
+
+#  Quản lý tài khoản
+from hashlib import sha3_256
+
+
+
+
+
+
+# Quản lý tài khoản
+# Xóa tài khoản_spkt
+def delete_tk_by_id_controller(id: int):
+    return delete_tk_by_id(id)
+
+
+# Khóa tài khoản_spkt
+def ban_account_by_id_controller(idtk: int):
+    return ban_account_by_id(idtk)
+
+
+# Kích hoạt tài khoản_spkt
+def unban_account_by_id_controller(idtk: int):
+    return unban_account_by_id(idtk)
+
+# Đổi mật khẩu taì khoản_spkt
+# def update_password_tk_controller(id: int, old_password: str, new_password: str):
+#     return update_password_tk(id, old_password, new_password)
+
+# Reset mật khẩu tài khoản_spkt
+def reset_password_tk_controller(id: int):
+    return reset_password_tk(id) 
+
+
+# Lấy danh sách tài khoản_spkt
+def get_ds_tai_khoan_controller():
+    return get_ds_tai_khoan()
+
+# Code thêm tài khoản _ quản lý tài khoản spkt
+# def add_account_controller(idnv: int, tk: str, mk: str, ngayt: str):
+#     return add_account(idnv, tk, mk, ngayt)
+
+# Code lấy thông tin chi tiết nhân viên_spkt
+def get_tai_khoan_by_id_controller(idtk):
+    return get_tai_khoan_by_id(idtk)
+
+
+# Thêm tài khoản_spkt
+
+def lay_nv_khong_co_tk_controller():
+    return lay_nv_khong_co_tk ()
+
+
+def add_account_controller(idnv: int, tk: str):
+    return add_account(idnv, tk)
+
+
+
+
+
+#Code cũ của src cũ
 def insert_sinh_vien_controller(MSSV, HoTen: str, GioiTinh: int, SDT: str, Email: str, DiaChi: str, MaLop: str, Truong: int, Nganh: int, Khoa: int, Password: str) -> bool:
     result = insert_sinh_vien(MSSV, HoTen, GioiTinh,
                               SDT, Email, DiaChi, MaLop, Truong, Nganh, Khoa, Password)
@@ -337,8 +403,6 @@ def get_phan_quyen_controller(username: str):
     return get_phan_quyen(username)
 
 
-def get_ds_tai_khoan_controller():
-    return get_ds_tai_khoan()
 
 
 def update_xoa_nguoi_huong_dan_by_id_controller(id: int):
