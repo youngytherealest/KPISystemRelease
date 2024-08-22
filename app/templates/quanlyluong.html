@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% include 'header.html' ignore missing %}
+        <title>Quản lý lương tạm thời | HTCC KPISYSTEM</title>
+        <style>
+            /* Đều chỉnh dành cho checkbox */
+            .select-all-checkbox,
+            .select-checkbox {
+                appearance: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                width: 15px;
+                height: 15px;
+                border: 1px solid #ddd;
+                border-radius: 3px;
+                background-color: white;
+                outline: none;
+                cursor: pointer;
+                
+            }
+            .select-all-checkbox:checked,
+            .select-checkbox:checked {
+                background-color: var(--primary);
+                border-color: var(--primary);
+            }
+
+            .select-all-checkbox:checked::after,
+            .select-checkbox:checked::after {
+                content: "\2713";
+                color: white;
+                font-size: 10px;
+                display: block;
+                text-align: center;
+            }
+
+            /* Định dạng bộ lọc */
+            .search-filters {
+                display: flex;
+                justify-content: flex-end;
+                margin-bottom: 10px;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .search-filters select,
+            .search-filters input[type="text"] {
+                padding: 5px;
+                border-radius: 3px;
+                border: 1px solid #ddd;
+            }
+            
+
+            /* Bố cục bảng*/
+            table {
+                width: 100%;
+                table-layout: fixed; 
+            }
+
+            th,
+            td {
+                text-align: center;
+                vertical-align: middle;
+                white-space: normal;
+                word-wrap: break-word; 
+            }
+
+            th {
+                font-weight: bold;
+            }
+
+            td {
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            th:first-child::after, 
+            th:first-child::before {
+                content: none !important;
+            }
+
+            /* Giao diện modal*/
+            #salary-rules-modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                justify-content: center;
+                align-items: center;
+            }
+
+            /* Form quy ước lương  */
+            #salary-rules-modal .modal-title {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
+            /*Form thông tin chi tiết */
+            .modal-content {
+                background: #fff;
+                padding: 20px;
+                border-radius: 8px;
+                width: 80%;
+                max-width: 600px;
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                border: 1px solid #ddd;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+
+            .modal-header {
+                padding: 15px;
+                display: flex;
+                justify-content: center;
+                border-bottom: none; 
+            }
+
+            .modal-title {
+                color: #364ff4;
+                font-size: 20px;
+                font-weight: 700;
+                text-align: center;
+                margin: 0;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
+
+            .modal-body .form-group {
+                margin-bottom: 15px;
+            }
+
+            .modal-body label {
+                font-weight: 600;
+                color: #555;
+            }
+
+            .modal-body input {
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                padding: 10px;
+                font-size: 14px;
+                width: 100%;
+                box-sizing: border-box;
+                text-align: center;
+            }
+
+            .modal-footer {
+                padding: 10px;
+                border-top: none;
+                display: flex;
+                justify-content: flex-end;
+            }
+
+            .btn-secondary {
+                border: none;
+                color: #6c757d;
+                font-size: 16px;
+                cursor: pointer;
+                transition: color 0.3s ease; /* Thêm hiệu ứng chuyển đổi mượt */
+            }
+
+
+            /* Nút đóng */
+            #close-modal {
+                background: #364ff4;
+                color: #fff;
+                border: none;
+                padding: 10px;
+                cursor: pointer;
+                margin-top: auto; 
+            }
+
+            .btn {
+                padding: 5px 10px; 
+                font-size: 14px; 
+                color: #fff;
+                border: none;
+                border-radius: 3px;
+                cursor: pointer;
+            }
+
+            /* Nút thao tác */
+            .btn-custom-purple {
+                background-color: #815bc9;
+                color: white;
+            }
+
+            .btn-custom-purple:hover {
+                background-color: #5e39a2; 
+                color: white; 
+            }
+
+            .btn-custom-pink {
+                background-color: #e83e8c;
+                color: white;
+                border: none; 
+                transition: background-color 0.3s ease;/
+            }
+
+            .btn-custom-pink:hover {
+                background-color: #d2257c;
+                color: white;
+            }
+
+        </style>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+        />
+    </head>
+
+    <body class="hold-transition sidebar-mini">
+        <!-- Vùng bao quanh trang web -->
+        <div class="wrapper">
+            {% include 'navbar.html' ignore missing %} {% include 'sidebar.html'
+            ignore missing %}
+
+            <!-- Vùng bao quang nội dung -->
+            <div class="content-wrapper">
+                <!-- Hiển thị thông tin -->
+                <section class="content-header">
+                    <div class="container-fluid">
+                        <div class="row mb-2">
+                            <div class="col-sm-6">
+                                <h1>QUẢN LÝ LƯƠNG TẠM THỜI</h1>
+                            </div>
+                            <div class="col-sm-6">
+                                <ol class="breadcrumb float-sm-right">
+                                    <li class="breadcrumb-item">
+                                        <a href="#">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">
+                                        Quản lý lương tạm thời
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Nội dung chính -->
+                <section class="col-lg-12 connectedSortable">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="search-filters">
+                                <!-- Bộ lọc tháng -->
+                                <select id="filter-month">
+                                    <option value="00">Chọn tháng</option>
+                                    <option value="01">Tháng 1</option>
+                                    <option value="02">Tháng 2</option>
+                                    <option value="03">Tháng 3</option>
+                                    <option value="04">Tháng 4</option>
+                                    <option value="05">Tháng 5</option>
+                                    <option value="06">Tháng 6</option>
+                                    <option value="07">Tháng 7</option>
+                                    <option value="08">Tháng 8</option>
+                                    <option value="09">Tháng 9</option>
+                                    <option value="10">Tháng 10</option>
+                                    <option value="11">Tháng 11</option>
+                                    <option value="12">Tháng 12</option>
+                                </select>
+
+                                <!-- Bộ lọc năm -->
+                                <select id="filter-year">
+                                    <option value="00">Chọn năm</option>
+                                    <option value="2025">Năm 2025</option>
+                                    <option value="2024">Năm 2024</option>
+                                    <option value="2023">Năm 2023</option>
+                                    <option value="2022">Năm 2022</option>
+                                    <option value="2021">Năm 2021</option>
+                                    <option value="2020">Năm 2020</option>
+                                    <option value="2019">Năm 2019</option>
+                                    <option value="2018">Năm 2018</option>
+                                    <option value="2017">Năm 2017</option>
+                                    <option value="2016">Năm 2016</option>
+                                    <option value="2015">Năm 2015</option>
+                                </select>
+                                <button id="salary-rules-btn" class="btn btn-info">Cách tính lương</button>
+                                <button id="restore-btn" class="btn btn-custom-purple" style="display: none;">Xuất file đã chọn</button>
+                                <button id="save-selected-employee-btn" class="btn btn-custom-pink" style="display: none;">Lưu nhân viên đã chọn</button>
+                            </div>
+
+                            <!-- Bảng hiển thị -->
+                            <table
+                                id="bangdsluong"
+                                class="table table-striped table-hover table-bordered"
+                            >
+                                <thead>
+                                    <tr>
+                                        <th>
+                                        </th>
+                                        <!-- <th>ID</th> -->
+                                        <!-- <th>ID thẻ</th> -->
+                                        <th>STT</th>
+                                        <th>Họ tên</th>
+                                        <th>Chức vụ</th>
+                                        <th>Hệ số lương</th>
+                                        <th>Lương cơ bản</th>
+                                        <th>Số lần đi trễ</th>
+                                        <th>Số lần về sớm</th>
+                                        <th>Số lần vắng</th>
+                                        <th>Số ngày làm dư</th>
+                                        <th>Lương tạm thời</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+
+                       
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            {% include 'footer.html' ignore missing %}
+        </div>
+
+        <!-- Form thông tin chi tiết phiếu lương  -->
+        <div
+        class="modal fade"
+        id="myModal"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+    >
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        THÔNG TIN CHI TIẾT PHIẾU LƯƠNG CÁ NHÂN
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <form id="modalForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="id">ID:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="id"
+                                        name="id"
+                                        readonly
+                                    />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="id_the">ID thẻ:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="id_the"
+                                        name="id_the"
+                                        readonly
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="ho_ten">Họ tên:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="ho_ten"
+                                        name="ho_ten"
+                                        readonly
+                                    />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="ngay_sinh">Ngày sinh:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="ngay_sinh"
+                                        name="ngay_sinh"
+                                        readonly
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="dia_chi">Địa chỉ:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="dia_chi"
+                                        name="dia_chi"
+                                        readonly
+                                    />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="dien_thoai">Điện thoại:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="dien_thoai"
+                                        name="dien_thoai"
+                                        readonly
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="email">Email:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="email"
+                                        name="email"
+                                        readonly
+                                    />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="ten_vt">Chức vụ:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="ten_vt"
+                                        name="ten_vt"
+                                        readonly
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="he_so">Hệ số lương:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="he_so"
+                                        name="he_so"
+                                        readonly
+                                    />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="luong_cb">Lương cơ bản:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="luong_cb"
+                                        name="luong_cb"
+                                        readonly
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="tre">Số lần đi trễ:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="tre"
+                                        name="tre"
+                                        readonly
+                                    />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="som">Số lần về sớm:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="som"
+                                        name="som"
+                                        readonly
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="vang">Số lần vắng:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="vang"
+                                        name="vang"
+                                        readonly
+                                    />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="du">Số ngày làm dư:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="du"
+                                        name="du"
+                                        readonly
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="luongtamthoi">Lương tạm thời:</label>
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="luongtamthoi"
+                                        name="luongtamthoi"
+                                        readonly
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-dismiss="modal"
+                    >
+                        Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form quy định cách tính lương tạm thời -->
+    <div id="salary-rules-modal">
+        <div class="modal-content">
+            <h2 class="modal-title">QUY ĐỊNH LƯƠNG TẠM THỜI</h2>
+            <p><i class="fas fa-calculator"></i><strong> Công thức tính lương tạm thời:</strong></p>
+            <p>Lương tạm thời = HSL * Lương cơ bản - Tổng tiền trừ - Tổng tiền vắng + Tổng tiền dư</p>
+            <p><i class="fas fa-info-circle"></i><strong> Thông tin chi tiết tính lương:</strong></p>
+            <p>Mỗi tháng lương bình thường được tính là 25 ngày công. Nếu số ngày công thực tế vượt quá 25 ngày, phần thừa được tính là số ngày làm dư. Ngược lại, nếu số ngày công ít hơn 25 ngày, số ngày thiếu được tính là số ngày vắng.</p>
+            <ul>
+                <li><strong>Quy định về việc đến trễ:</strong>
+                    <ul>
+                        <li>Không trừ lương nếu số lần đến trễ ít hơn hoặc bằng 3 lần.</li>
+                        <li>Từ lần thứ 4 trở đi, mỗi lần đến trễ sẽ bị trừ 10.000 VNĐ.</li>
+                    </ul>
+                </li>
+                <li><strong>Quy định về việc về sớm:</strong>
+                    <ul>
+                        <li>Không trừ lương nếu số lần về sớm ít hơn hoặc bằng 3 lần.</li>
+                        <li>Từ lần thứ 4 trở đi, mỗi lần về sớm sẽ bị trừ 10.000 VNĐ.</li>
+                    </ul>
+                </li>
+                <li><strong>Quy định về việc cảnh báo:</strong>
+                    <ul>
+                        <li>Nếu số lần vi phạm (trễ, sớm, vắng) vượt quá 15 lần trong tháng, sẽ xuất hiện cảnh báo.</li>
+                        <li>Căn cứ vào điều này, ban quản lý có thể thực hiện họp khiển trách hoặc phạt vi phạm cho nhân viên đó.</li>
+                    </ul>
+                </li>
+                <li><strong>Tổng tiền trừ:</strong> Số lần đi trễ (quá số lần quy định) * 10.000 VNĐ + Số lần về sớm (quá số lần quy định) * 10.000 VNĐ</li>
+                <li><strong>Lương hàng ngày:</strong> (HSL * Lương cơ bản) / 25</li>
+                <li><strong>Tổng tiền vắng:</strong> Số lần vắng * Lương hàng ngày</li>
+                <li><strong>Tổng tiền dư:</strong> Số lần làm dư * Lương hàng ngày * 2</li>
+            </ul>
+            <button id="close-modal">Đóng</button>
+        </div>
+    </div>
+    
+        <!-- jQuery -->
+        <script src="plugins/jquery/jquery.min.js"></script>
+
+        <!-- jQuery UI 1.11.4 -->
+        <script src="plugins/jquery-ui/jquery-ui.min.js"></script>
+
+        <!-- Sử dụng cả jQuery UI tooltip và Bootstrap tooltip trong một dự án -> Xử lý xung đột-->
+        <script>
+            $.widget.bridge("uibutton", $.ui.button);
+        </script>
+
+        <!-- Bootstrap 4 -->
+        <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+        <!-- DataTables -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"
+                integrity="sha512-BkpSL20WETFylMrcirBahHfSnY++H2O1W+UnEEO4yNIl+jI2+zowyoGJpbtk6bx97fBXf++WJHSSK2MV4ghPcg=="
+                crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/dataTables.bootstrap4.min.js"
+                integrity="sha512-OQlawZneA7zzfI6B1n1tjUuo3C5mtYuAWpQdg+iI9mkDoo7iFzTqnQHf+K5ThOWNJ9AbXL4+ZDwH7ykySPQc+A=="
+                crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+        <!-- Các plugin khác -->
+        <script src="plugins/chart.js/Chart.min.js"></script>
+        <script src="plugins/sparklines/sparkline.js"></script>
+        <script src="plugins/jqvmap/jquery.vmap.min.js"></script>
+        <script src="plugins/jqvmap/maps/jquery.vmap.usa.js"></script>
+        <script src="plugins/jquery-knob/jquery.knob.min.js"></script>
+        <script src="plugins/moment/moment.min.js"></script>
+        <script src="plugins/daterangepicker/daterangepicker.js"></script>
+        <script src="plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+        <script src="plugins/summernote/summernote-bs4.min.js"></script>
+        <script src="plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+
+        <!-- SweetAlert2 CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+        <!-- SweetAlert2 JS -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <!-- SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <!-- AdminLTE -->
+        <script src="dist/js/adminlte.js"></script>
+
+        <!-- AdminLTE for demo purposes -->
+        <script src="dist/js/demo.js"></script>
+
+        <!-- DataTables CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap4.min.css"
+            integrity="sha512-PT0RvABaDhDQugEbpNMwgYBCnGCiTZMh9yOzUsJHDgl/dMhD9yjHAwoumnUk3JydV3QTcIkNDuN40CJxik5+WQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
+        <!-- Custom JS -->
+        <script src="dist/js/pages/quanlyluong.js"></script>
+
+        <!-- XLSX -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+
+         <!-- Thư viện docx.js -->
+        <script src="https://cdn.jsdelivr.net/npm/docx@8.0.0/build/index.js"></script>
+
+        <!-- Thư viện FileSaver.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+        <!-- Liên kết đến Font Awesome-> Sử dụng icon biểu tượng -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    </body>
+</html>
