@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {% include 'header.html' ignore missing %}
+        <title>Quản lý lương tạm thời | HTCC KPISYSTEM</title>
+        <style>
+            /* Custom styles for checkbox */
+            .select-all-checkbox,
+            .select-checkbox {
+                appearance: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                width: 15px;
+                height: 15px;
+                border: 1px solid #ddd;
+                border-radius: 3px;
+                background-color: white;
+                outline: none;
+                cursor: pointer;
+            }
+
+            .select-all-checkbox:checked,
+            .select-checkbox:checked {
+                background-color: var(--primary);
+                border-color: var(--primary);
+            }
+
+            .select-all-checkbox:checked::after,
+            .select-checkbox:checked::after {
+                content: "\2713";
+                color: white;
+                font-size: 10px;
+                display: block;
+                text-align: center;
+            }
+
+            /* Styles for search filters */
+            .search-filters {
+                display: flex;
+                justify-content: flex-end;
+                margin-bottom: 10px;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .search-filters select,
+            .search-filters input[type="text"] {
+                padding: 5px;
+                border-radius: 3px;
+                border: 1px solid #ddd;
+            }
+            
+
+            /* Table layout */
+            table {
+                width: 100%;
+                table-layout: fixed; /* Ensure consistent column width */
+            }
+
+            th,
+            td {
+                text-align: center;
+                vertical-align: middle;
+                white-space: normal; /* Allow text to wrap */
+                word-wrap: break-word; /* Break long words if needed */
+            }
+
+            th {
+                font-weight: bold;
+            }
+
+            td {
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        </style>
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+        />
+    </head>
+
+    <body class="hold-transition sidebar-mini">
+        <!-- Site wrapper -->
+        <div class="wrapper">
+            {% include 'navbar.html' ignore missing %} {% include 'sidebar.html'
+            ignore missing %}
+
+            <!-- Content Wrapper. Contains page content -->
+            <div class="content-wrapper">
+                <!-- Content Header (Page header) -->
+                <section class="content-header">
+                    <div class="container-fluid">
+                        <div class="row mb-2">
+                            <div class="col-sm-6">
+                                <h1>QUẢN LÝ LƯƠNG TẠM THỜI</h1>
+                            </div>
+                            <div class="col-sm-6">
+                                <ol class="breadcrumb float-sm-right">
+                                    <li class="breadcrumb-item">
+                                        <a href="#">Home</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">
+                                        Quản lý lương tạm thời
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Main content -->
+                <section class="col-lg-12 connectedSortable">
+                    <!-- Card with table -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="search-filters">
+                                <!-- Month filter -->
+                                <select id="filter-month">
+                                    <option value="00">Chọn tháng</option>
+                                    <option value="01">Tháng 1</option>
+                                    <option value="02">Tháng 2</option>
+                                    <option value="03">Tháng 3</option>
+                                    <option value="04">Tháng 4</option>
+                                    <option value="05">Tháng 5</option>
+                                    <option value="06">Tháng 6</option>
+                                    <option value="07">Tháng 7</option>
+                                    <option value="08">Tháng 8</option>
+                                    <option value="09">Tháng 9</option>
+                                    <option value="10">Tháng 10</option>
+                                    <option value="11">Tháng 11</option>
+                                    <option value="12">Tháng 12</option>
+                                </select>
+
+                                <!-- Year filter -->
+                                <select id="filter-year">
+                                    <option value="00">Chọn năm</option>
+                                    <option value="2025">Năm 2025</option>
+                                    <option value="2024">Năm 2024</option>
+                                    <option value="2023">Năm 2023</option>
+                                    <option value="2022">Năm 2022</option>
+                                    <option value="2021">Năm 2021</option>
+                                    <option value="2020">Năm 2020</option>
+                                    <option value="2019">Năm 2019</option>
+                                    <option value="2018">Năm 2018</option>
+                                    <option value="2017">Năm 2017</option>
+                                    <option value="2016">Năm 2016</option>
+                                    <option value="2015">Năm 2015</option>
+                                </select>
+                                <button id="export-all-btn" class="btn btn-success">Xuất toàn bộ</button>
+                                <button id="delete-all-btn" class="btn btn-danger" style="display: none;">Xóa tất cả</button>
+                            </div>
+
+                            <!-- Table -->
+                            <table
+                                id="bangdscacnganh"
+                                class="table table-striped table-hover table-bordered"
+                            >
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <input type="checkbox" id="select-all-checkbox" class="select-checkbox" />
+                                        </th>
+                                        <th>ID</th>
+                                        <th>ID thẻ</th>
+                                        <th>Họ tên</th>
+                                        <th>Chức vụ</th>
+                                        <th>Hệ số lương</th>
+                                        <th>Lương cơ bản</th>
+                                        <th>Số lần đi trễ</th>
+                                        <th>Số lần về sớm</th>
+                                        <th>Số lần vắng</th>
+                                        <th>Số ngày làm dư</th>
+                                        <th>Lương tạm thời</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            {% include 'footer.html' ignore missing %}
+        </div>
+
+        <div
+            class="modal fade"
+            id="myModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="exampleModalLabel"
+            aria-hidden="true"
+        >
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">
+                            THÔNG TIN CHI TIẾT PHIẾU LƯƠNG CÁ NHÂN
+                        </h5>
+                        <button
+                            type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close"
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="modalForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id">ID:</label>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="id"
+                                            name="id"
+                                            readonly
+                                        />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_the">ID thẻ:</label>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="id_the"
+                                            name="id_the"
+                                            readonly
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="ho_ten">Họ tên:</label>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="ho_ten"
+                                            name="ho_ten"
+                                            readonly
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="ten_vt">Chức vụ:</label>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="ten_vt"
+                                            name="ten_vt"
+                                            readonly
+                                        />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="he_so">Hệ số lương:</label>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="he_so"
+                                            name="he_so"
+                                            readonly
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="luong_cb"
+                                            >Lương cơ bản:</label
+                                        >
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="luong_cb"
+                                            name="luong_cb"
+                                            readonly
+                                        />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="tre">Số lần đi trễ:</label>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="tre"
+                                            name="tre"
+                                            readonly
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="som">Số lần về sớm:</label>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="som"
+                                            name="som"
+                                            readonly
+                                        />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="vang">Số lần vắng:</label>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="vang"
+                                            name="vang"
+                                            readonly
+                                        />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="du">Số ngày làm dư:</label>
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="du"
+                                            name="du"
+                                            readonly
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-dismiss="modal"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="plugins/jquery/jquery.min.js"></script>
+        <!-- jQuery UI 1.11.4 -->
+        <script src="plugins/jquery-ui/jquery-ui.min.js"></script>
+        <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+        <script>
+            $.widget.bridge("uibutton", $.ui.button);
+        </script>
+        <!-- Bootstrap 4 -->
+        <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <!-- ChartJS -->
+        <script src="plugins/chart.js/Chart.min.js"></script>
+        <!-- Sparkline -->
+        <script src="plugins/sparklines/sparkline.js"></script>
+        <!-- JQVMap -->
+        <script src="plugins/jqvmap/jquery.vmap.min.js"></script>
+        <script src="plugins/jqvmap/maps/jquery.vmap.usa.js"></script>
+        <!-- jQuery Knob Chart -->
+        <script src="plugins/jquery-knob/jquery.knob.min.js"></script>
+        <!-- daterangepicker -->
+        <script src="plugins/moment/moment.min.js"></script>
+        <script src="plugins/daterangepicker/daterangepicker.js"></script>
+        <!-- Tempusdominus Bootstrap 4 -->
+        <script src="plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+        <!-- Summernote -->
+        <script src="plugins/summernote/summernote-bs4.min.js"></script>
+        <!-- overlayScrollbars -->
+        <script src="plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+        <!-- AdminLTE App -->
+        <script src="dist/js/adminlte.js"></script>
+        <!-- AdminLTE for demo purposes -->
+        <script src="dist/js/demo.js"></script>
+        <!-- SweetAlert2 -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"
+            integrity="sha512-BkpSL20WETFylMrcirBahHfSnY++H2O1W+UnEEO4yNIl+jI2+zowyoGJpbtk6bx97fBXf++WJHSSK2MV4ghPcg=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        ></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/dataTables.bootstrap4.min.js"
+            integrity="sha512-OQlawZneA7zzfI6B1n1tjUuo3C5mtYuAWpQdg+iI9mkDoo7iFzTqnQHf+K5ThOWNJ9AbXL4+ZDwH7ykySPQc+A=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        ></script>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap4.min.css"
+            integrity="sha512-PT0RvABaDhDQugEbpNMwgYBCnGCiTZMh9yOzUsJHDgl/dMhD9yjHAwoumnUk3JydV3QTcIkNDuN40CJxik5+WQ=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+        <script src="dist/js/pages/danhmucnganh.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                // Hàm kiểm tra xem có checkbox nào được chọn không
+                function toggleDeleteButton() {
+                    const anyChecked = $('.select-checkbox:checked').length > 0;
+                    if (anyChecked) {
+                        $('#delete-all-btn').show();
+                    } else {
+                        $('#delete-all-btn').hide();
+                    }
+                }
+        
+                // Lắng nghe sự thay đổi của các checkbox
+                $(document).on('change', '.select-checkbox, #select-all-checkbox', function() {
+                    toggleDeleteButton();
+                });
+        
+                // Lắng nghe sự thay đổi của checkbox "Chọn tất cả"
+                $('#select-all-checkbox').on('change', function() {
+                    const isChecked = $(this).is(':checked');
+                    $('.select-checkbox').prop('checked', isChecked);
+                    toggleDeleteButton();
+                });
+        
+                // Kiểm tra ngay khi trang tải
+                toggleDeleteButton();
+            });
+        </script>
+        
+    </body>
+</html>
