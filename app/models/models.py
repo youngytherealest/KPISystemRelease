@@ -2,8 +2,11 @@ import os
 from ..config import create_connection
 from ..send_otp import is_otp_valid
 import datetime
-import bleach
+import bleach # type: ignore
 import json
+# thư viên qltk
+import logging
+from datetime import datetime
 
 conn = create_connection()
 cursor = conn.cursor()
@@ -76,6 +79,357 @@ def count_all_sinh_vien():
         return result.fetchone()[0]
     except Exception as e:
         return e
+
+
+#Code quản lý thông tin lương cơ bản
+# Code lấy nhân viên danh sách toàn bộ nhân viên đang làm
+def get_user_roles():
+    try:
+        result = cursor.execute("""
+        SELECT 
+            u.id, u.idthe, u.idpb, u.idclv, u.hoten, u.gioitinh, u.ngaysinh, u.diachi, 
+            u.dienthoai, u.email, u.trangthai, p.idu, p.idvt, p.trangthai, p.ghichu, 
+            v.idvt, v.tenvt, v.ngaytao, v.ngaycapnhat, 
+            v.heso, v.luongcb, v.trangthai, v.ghichu
+        FROM 
+            usercty_spkt u
+        JOIN 
+            phanquyen_spkt p ON u.id = p.idu
+        JOIN 
+            vaitro_spkt v ON p.idvt = v.idvt
+        WHERE 
+            u.trangthai = 1 AND p.trangthai = 1 AND v.trangthai = 1
+        ORDER BY 
+            u.id
+                                """)
+        return result.fetchall()
+    except Exception as e:
+        return e
+
+# Code lấy nhân viên danh sách nhân viên đang làm theo id
+def get_user_roles_by_id(id):
+    try:
+        result = cursor.execute("""
+        SELECT 
+            u.id, u.idthe, u.idpb, u.idclv, u.hoten, u.gioitinh, u.ngaysinh, u.diachi, 
+            u.dienthoai, u.email, u.trangthai, p.idu, p.idvt, p.trangthai, p.ghichu, 
+            v.idvt, v.tenvt, v.ngaytao, v.ngaycapnhat, 
+            v.heso, v.luongcb, v.trangthai, v.ghichu
+        FROM 
+            usercty_spkt u
+        JOIN 
+            phanquyen_spkt p ON u.id = p.idu
+        JOIN 
+            vaitro_spkt v ON p.idvt = v.idvt
+        WHERE 
+            u.trangthai = 1 AND p.trangthai = 1 AND v.trangthai = 1 AND u.id = ?
+        ORDER BY 
+            u.id
+                                """, (id, ))
+        return result.fetchall()
+    except Exception as e:
+        return e
+    
+# Lấy thông tin vi phạm (trễ, sớm, vắng, dư) theo tháng năm truyền vào
+def get_tsvu(IDU, Thang, Nam):
+    try:
+        result = cursor.execute("EXEC GetTSVU_thang_spkt @IDU = ?, @Thang = ?, @Nam = ?", (IDU, Thang, Nam)).fetchall()
+
+        result_data = [{'tre': i[0], 'som': i[1], 'vang': i[2] , 'du': i[3]} for i in result]
+        return result_data
+
+    except Exception as e:
+        return e
+
+
+# Lưu một nhân viên
+def save_tsvu(
+        id_: int,
+        idthe: int,
+        hoten: str,
+        tenvt: str,
+        heso: float,
+        luongcb: int,
+        tre: int,
+        som: int,
+        vang: int,
+        du: int,
+        luongtamthoi: int,
+        ngayluu: str,
+        thang: int,
+        year: int
+    ) -> bool:
+
+    try:
+        conn = create_connection()
+        cursor = conn.cursor()
+
+        sanitized_hoten = protect_xss(hoten)
+        sanitized_tenvt = protect_xss(tenvt)
+        sanitized_ngayluu = protect_xss(ngayluu)
+
+        cursor.execute(
+            "EXEC SaveLuong_spkt @idu = ?, @idthe = ?, @hoten = ?, @chucvu = ?, @hsl = ?, @luongcoban = ?, @sltre = ?, @slsom = ?, @slvang = ?, @sldu = ?, @luongtamthoi = ?, @ngayluu = ?, @thang = ?, @nam = ?",
+            (
+                id_,
+                idthe,
+                hoten,
+                tenvt,
+                heso,
+                luongcb,
+                tre,
+                som,
+                vang,
+                du,
+                luongtamthoi,
+                ngayluu,
+                thang,
+                year
+            )
+        )
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"Error in save_tsvu: {e}")
+        return False
+    
+# Lưu thông tin toàn bộ nhân viên
+def get_all_employees(month: int, year: int):
+    try:
+        conn = create_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+        )
+        employees = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return employees
+    except Exception as e:
+        print(f"Error in get_all_employees: {e}")
+        return []
+
+
+
+
+# Quản lý thông tin tài khoản
+def get_ds_tai_khoan():
+    try:
+        # Thực hiện câu lệnh SELECT để lấy dữ liệu từ các bảng 'taikhoan_spkt', 'usercty_spkt', 'phanquyen_spkt', và 'vaitro_spkt'
+        query = """
+        SELECT 
+            t.idtk, 
+            t.idu, 
+            t.tk, 
+            t.mk, 
+            t.ngaytao, 
+            t.ngaycapnhat, 
+            t.trangthai AS trangthai_tk,
+            u.hoten, 
+            u.gioitinh, 
+            u.ngaysinh, 
+            u.diachi, 
+            u.dienthoai, 
+            u.email, 
+            u.trangthai AS trangthai_user,
+            pq.idvt,
+            vt.tenvt
+        FROM 
+            taikhoan_spkt t
+        JOIN 
+            usercty_spkt u ON t.idu = u.id
+        LEFT JOIN 
+            phanquyen_spkt pq ON u.id = pq.idu
+        LEFT JOIN 
+            vaitro_spkt vt ON pq.idvt = vt.idvt
+        """
+
+        result = cursor.execute(query).fetchall()
+
+        # Chuyển kết quả thành danh sách các từ điển
+        accounts = [
+            {
+                'idtk': row[0],
+                'idu': row[1],
+                'tk': row[2],
+                'mk': row[3],
+                'ngaytao': row[4],
+                'ngaycapnhat': row[5],
+                'trangthai_tk': row[6],
+                'hoten': row[7],
+                'gioitinh': row[8],
+                'ngaysinh': row[9],
+                'diachi': row[10],
+                'dienthoai': row[11],
+                'email': row[12],
+                'trangthai_user': row[13],
+                'idvt': row[14],  # Role ID
+                'tenvt': row[15]   # Role name
+            }
+            for row in result
+        ]
+
+        return accounts
+    except Exception as e:
+        return str(e)
+
+
+def delete_tk_by_id(id: int):
+    try:
+        result = cursor.execute("EXEC DeleteTK_spkt ?", id).fetchone()
+        cursor.commit()
+        return result[0]
+    except Exception as e:
+        return str(e)
+    
+def update_password_by_id(idtk: int, hashed_password: str):
+    try:
+        cursor.execute(
+            "EXEC ChangePassFromAD_ByID_spkt @idtk=?, @ngaycn=?, @mk=?", 
+            idtk, datetime.now().date(), hashed_password)
+        cursor.commit()
+        return cursor.rowcount
+    except Exception as e:
+        return 0
+    
+# Code ban và kích hoạt tài khoản _ quản lý tài khoản _ spkt   
+def ban_account_by_id(idtk: int):
+    try:
+        # Thực hiện stored procedure
+        cursor.execute("EXEC BanAccountByID_spkt @idtk = ?", idtk)
+        conn.commit()
+        # Lấy số dòng bị ảnh hưởng
+        affected_rows = cursor.execute("SELECT @@ROWCOUNT").fetchone()
+        return affected_rows[0]
+    except Exception as e:
+        conn.rollback()
+        return str(e)
+
+def unban_account_by_id(idtk: int):
+    try:
+        # Thực hiện stored procedure
+        cursor.execute("EXEC UnBanAccountByID_spkt @idtk = ?", idtk)
+        conn.commit()
+        # Lấy số dòng bị ảnh hưởng
+        affected_rows = cursor.execute("SELECT @@ROWCOUNT").fetchone()
+        return affected_rows[0]
+    except Exception as e:
+        conn.rollback()
+        return str(e)
+
+# Thêm tài khoản
+# def add_account(idnv: int, tk: str, mk: str, ngayt: str):
+#     try:
+#         # Thực hiện stored procedure
+#         cursor.execute("EXEC AddTK_spkt @IDU = ?, @TK = ?, @Password = ?, @ngayt = ?", idnv, tk, mk, ngayt)
+#         conn.commit()
+
+#         # Lấy số dòng bị ảnh hưởng từ kết quả trả về của stored procedure
+#         affected_rows = cursor.fetchone()
+        
+#         # Nếu affected_rows không phải là None và lớn hơn 0, nghĩa là thêm thành công
+#         if affected_rows and affected_rows[0] > 0:
+#             return "OK"
+#         else:
+#             return "EXISTS"  # Tài khoản có thể đã tồn tại hoặc không thể thêm
+
+#     except Exception as e:
+#         conn.rollback()
+#         return str(e)
+
+
+import hashlib
+
+def add_account(idnv: int, tk: str, mk: str):
+    try:
+        # Mã hóa mật khẩu trước khi lưu
+        hashed_password = hashlib.sha256(mk.encode('utf-8')).hexdigest()
+
+        # Lấy thời gian hiện tại
+        ngayt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        cursor.execute("EXEC AddTK_spkt @IDU = ?, @TK = ?, @Password = ?, @ngayt = ?", idnv, tk, hashed_password, ngayt)
+        conn.commit()
+
+        affected_rows = cursor.rowcount
+
+        if affected_rows == 1:
+            return "OK"
+        else:
+            return "EXISTS"
+    except Exception as e:
+        conn.rollback()
+        return str(e)
+    
+# Code lấy thông tin chi tiết
+def get_tai_khoan_by_id(idtk):
+    try:
+        query = """
+        SELECT 
+            t.idtk, 
+            t.tk, 
+            t.ngaytao, 
+            t.ngaycapnhat, 
+            t.trangthai AS trangthai_tk,
+            u.hoten, 
+            u.gioitinh, 
+            u.ngaysinh, 
+            u.diachi, 
+            u.dienthoai, 
+            u.email, 
+            u.trangthai AS trangthai_user,
+            vt.tenvt
+        FROM 
+            taikhoan_spkt t
+        JOIN 
+            usercty_spkt u ON t.idu = u.id
+        LEFT JOIN 
+            phanquyen_spkt pq ON u.id = pq.idu
+        LEFT JOIN 
+            vaitro_spkt vt ON pq.idvt = vt.idvt
+        WHERE 
+            t.idtk = ?
+        """
+        result = cursor.execute(query, (idtk,)).fetchone()
+
+        if result:
+            account = {
+                'idtk': result[0],
+                'tk': result[1],
+                'ngaytao': result[2],
+                'ngaycapnhat': result[3],
+                'trangthai_tk': result[4],
+                'hoten': result[5],
+                'gioitinh': result[6],
+                'ngaysinh': result[7],
+                'diachi': result[8],
+                'dienthoai': result[9],
+                'email': result[10],
+                'trangthai_user': result[11],
+                'tenvt': result[12],
+            }
+            return account
+        else:
+            return None
+    except Exception as e:
+        return str(e)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def ti_le_sinh_vien_da_danh_gia():
@@ -871,12 +1225,12 @@ def get_phan_quyen(username: str):
         return e
 
 
-def get_ds_tai_khoan():
-    try:
-        result = cursor.execute("EXEC GetDSTaiKhoanNguoiHuongDan").fetchall()
-        return [{'id': i[0], 'hoten': i[1], 'username': i[2], 'email': i[3], 'role': i[4], 'trangthai': i[5], 'tenvaitro': i[6]} for i in result]
-    except Exception as e:
-        return e
+# def get_ds_tai_khoan():
+#     try:
+#         result = cursor.execute("EXEC GetDSTaiKhoanNguoiHuongDan").fetchall()
+#         return [{'id': i[0], 'hoten': i[1], 'username': i[2], 'email': i[3], 'role': i[4], 'trangthai': i[5], 'tenvaitro': i[6]} for i in result]
+#     except Exception as e:
+#         return e
 
 
 def update_xoa_nguoi_huong_dan_by_id(id: int):
