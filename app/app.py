@@ -1,23 +1,50 @@
-from fastapi import FastAPI, Request, Depends, HTTPException, Cookie, UploadFile, File, Body, Form
-from fastapi.security import OAuth2PasswordBearer
-from fastapi.responses import Response, JSONResponse, RedirectResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request, Depends, HTTPException, Cookie, UploadFile, File, Body, Form # type: ignore
+from fastapi.security import OAuth2PasswordBearer # type: ignore
+from fastapi.responses import Response, JSONResponse, RedirectResponse, FileResponse # type: ignore
+from fastapi.staticfiles import StaticFiles # type: ignore
+from fastapi.templating import Jinja2Templates # type: ignore
+from fastapi.middleware.cors import CORSMiddleware # type: ignore
+
+
+# Đây là code import dữ liệu cần thiết cho quản lý chấm công
+from typing import List, Dict
+from pydantic import BaseModel # type: ignore
+from datetime import date
+import json
+# from fastapi import FastAPI
+# from fastapi.responses import JSONResponse
+# import json
+# import os
+# from fastapi import FastAPI, Depends, HTTPException
+# from fastapi.responses import JSONResponse
+# from fastapi.security import OAuth2PasswordBearer
+
+
+
+#Đây là code quản lý tài khoản
+import logging
+from starlette.config import Config # type: ignore
+config = Config(".env")
+DEFAULT_PASSWORD = config("DEFAULT_PASSWORD", cast=str)
+
+
+
+
+
 # Để khai báo format của request body, bạn cần sử dụng Pydantic models
-from flask import Flask, jsonify
-from pydantic import BaseModel
+from flask import Flask, jsonify # type: ignore
+from pydantic import BaseModel # type: ignore
 from hashlib import sha3_256
 from typing import List
 
 from .controllers.controller import *
-from .send_otp import send_otp_email, is_otp_valid
+from .send_otp import is_otp_valid
 from .send_telegram_message import sendMessageTelegram, admin_chat_id
 
 import os
-import jwt
+import jwt # type: ignore
 import datetime
-import pandas as pd
+import pandas as pd # type: ignore
 import zipfile
 import shutil
 import asyncio
@@ -38,7 +65,10 @@ app.mount("/plugins", StaticFiles(directory=os.path.join(os.getcwd(),
 
 templates = Jinja2Templates(
     directory=os.path.join(os.getcwd(), "app", "templates"))
-
+# Định nghĩa mô hình dữ liệu Absence
+class Absence(BaseModel):
+    idu: int
+    absences: int
 
 class UserCredentials(BaseModel):
     username: str
@@ -117,34 +147,313 @@ ALGORITHM = algorithm
 ACCESS_TOKEN_EXPIRE_MINUTES = 60*3
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+# Quản lý tài khoản _ spkt
+class BanAccountRequest(BaseModel):
+    idtk: int
+    ngaycn: str
 
-# def verify_user_route(credentials: UserCredentials):
-#     if '@' in credentials.username:
-#         id = verify_student_controller(email=credentials.username, password=sha3_256(
-#             bytes(credentials.password, 'utf-8')).hexdigest())
-#         if id:
-#             return {"isVerified": True, "permission": "student", "id": int(id)}
-#     else:
-#         id = verify_user_controller(username=credentials.username, password=sha3_256(
-#             bytes(credentials.password, 'utf-8')).hexdigest())
-#         if id:
-#             return {"isVerified": True, "permission": get_phan_quyen_controller(credentials.username), "id": int(id)}
+class ActivateAccountRequest(BaseModel):
+    idtk: int
+    ngaycn: str
 
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=401, detail="Could not validate credentials")
+#Quản lý thông tin lương tạm thời
+# Kiểm tra đăng nhập, chuyển trang nếu đăng nhập thành công
+@app.get('/quanlyluong')
+async def quan_ly_luong(request: Request, token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            uid = payload.get("id")
+            if permission == "user" and check_role(uid, '/quanlyluong'):
+                return templates.TemplateResponse('quanlyluong.html', context={'request': request})
+        except jwt.PyJWTError:
+            print("Da loi")
+            return RedirectResponse('/login')
+    return RedirectResponse('/login')
+
+#  Chuyển đổi kết quả truy vấn từ cơ sở dữ liệu
+def transform_result_to_json(keys, result):
+    # Chuyển đổi kết quả thành một danh sách
+    data = []
+    for row in result:
+        row_dict = dict(zip(keys, row))
+        # Chuyển đổi các đối tượng tháng năm thành chuỗi
+        for key, value in row_dict.items():
+            if isinstance(value, date):
+                row_dict[key] = value.isoformat()
+        data.append(row_dict)
+    
+    return data
+
+# Lấy toàn bộ danh sách nhân viên
+@app.get('/get_danh_sach_luong')
+async def get_danh_sach_nganh_route(month: int = None, year: int = None):
+    if month is None or year is None:
+        return JSONResponse(status_code=400, content={"message": "Month and Year are required"})
+
+
+    result = get_user_rules_controller()
+       
+    keys = [
+        "id", "id_the", "id_pb", "id_clv", "ho_ten", "gioi_tinh", "ngay_sinh", "dia_chi", 
+        "dien_thoai", "email", "trang_thai", "idu", "id_vt", "trang_thai_p", "ghi_chu_p", 
+        "id_vt_v", "ten_vt", "ngay_tao", "ngay_cap_nhat", 
+        "he_so", "luong_cb", "trang_thai_v", "ghi_chu_v"
+    ] 
+
+    data = transform_result_to_json(keys, result)
+    # return JSONResponse(status_code=200, content=data)
+    for user in data:
+        user_id = user["id"]
+        counts = get_tsvu_controller(user_id, month, year)[0]
+
+        user["som"] = counts['som']
+        user["tre"] = counts['tre']
+        user["vang"] = counts['vang']
+        user["du"] = counts['du']
+        user["month"] = month
+        user["year"] = year
+
+    return JSONResponse(status_code=200, content=data)
+
+# Lấy danh sách nhân viên theo id
+@app.get('/get_danh_sach_luong_by_id')
+async def get_danh_sach_nganh_by_id_route(id:int = None,month: int = None, year: int = None):
+    if month is None or year is None:
+        return JSONResponse(status_code=400, content={"message": "Month and Year are required"})
+
+
+    result = get_user_rules_by_id_controller(id)
+       
+    keys = [
+        "id", "id_the", "id_pb", "id_clv", "ho_ten", "gioi_tinh", "ngay_sinh", "dia_chi", 
+        "dien_thoai", "email", "trang_thai", "idu", "id_vt", "trang_thai_p", "ghi_chu_p", 
+        "id_vt_v", "ten_vt", "ngay_tao", "ngay_cap_nhat", 
+        "he_so", "luong_cb", "trang_thai_v", "ghi_chu_v"
+    ] 
+
+    data = transform_result_to_json(keys, result)
+
+    user_id = id
+    counts = get_tsvu_controller(user_id, month, year)[0]
+
+    data[0]["som"] = counts['som']
+    data[0]["tre"] = counts['tre']
+    data[0]["vang"] = counts['vang']
+    data[0]["du"] = counts['du']
+    data[0]["month"] = month
+    data[0]["year"] = year
+
+    return JSONResponse(status_code=200, content=data)
+
+# Lưu thông tin một nhân viên
+@app.post('/save_info_luong')
+async def post_luong_route(request: Request):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-    except jwt.PyJWTError:
-        raise credentials_exception
-    return username
+        data = await request.json()
+        if not data:
+            return JSONResponse(status_code=400, content={'error': 'No input data provided'})
+        
+        print("Received data:", data)
 
+        rs = save_tsvu_controller(
+            data['id'],
+            data['idthe'],
+            data['hoten'],
+            data['tenvt'],
+            data['heso'],
+            data['luongcb'],
+            data['tre'],
+            data['som'],
+            data['vang'],
+            data['du_'],
+            data['luongtamthoi'],
+            data['ngayluu'],
+            data['thang'],
+            data['year']
+        )
+        
+        print('Save result:', rs)
+        
+        return JSONResponse(status_code=200, content={"message": "Data received", "data": data})
+    except Exception as e:
+        print(f"Error in post_luong_route: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+    
+# Lưu thông tin toàn bộ nhân viên
+@app.get('/get_all_employees')
+async def get_all_employees_route(month: int, year: int):
+    try:
+        employees = get_all_employees_controller(month, year)
+        return JSONResponse(status_code=200, content=employees)
+    except Exception as e:
+        print(f"Error in get_all_employees_route: {e}")
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+    
+# Quản lý tài khoản _spkt
+# Ban tài khoản
+class BanAccountRequest(BaseModel):
+    idtk: int
+
+@app.post('/ban_account_by_id')
+async def ban_account_by_id_route(request: BanAccountRequest):
+    try:
+        # Gọi hàm xử lý việc ban tài khoản
+        result = ban_account_by_id_controller(request.idtk)
+        if result == 1:
+            return JSONResponse(status_code=200, content={'status': 'OK'})
+        else:
+            return JSONResponse(status_code=400, content={'status': 'FAIL'})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={'status': 'ERROR', 'detail': str(e)})
+
+# Kích hoạt lại tài khoản
+class UnBanAccountRequest(BaseModel):
+    idtk: int
+
+@app.post('/update_active_account_by_id')
+async def unban_account_by_id_route(request: UnBanAccountRequest):
+    try:
+        # Gọi hàm xử lý việc kích hoạt tài khoản
+        result = unban_account_by_id_controller(request.idtk)
+        if result == 1:
+            return JSONResponse(status_code=200, content={'status': 'OK'})
+        elif result == 0:
+            return JSONResponse(status_code=400, content={'status': 'NOT_INACTIVE'})
+        else:
+            return JSONResponse(status_code=400, content={'status': 'FAIL'})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={'status': 'ERROR', 'detail': str(e)})
+
+@app.post('/change_password')
+async def change_password_route(idtk: int, current_password: str, new_password: str, token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            user_id = payload.get("id")
+            if permission == "user" and check_role(user_id, '/quanlytaikhoan'):
+                # Gọi hàm kiểm tra mật khẩu hiện tại
+                if not verify_password(idtk, current_password):
+                    return JSONResponse(status_code=400, content={'status': 'Failed', 'message': 'Mật khẩu hiện tại không đúng'})
+                
+                # Cập nhật mật khẩu mới
+                result = change_password_controller(idtk, new_password)
+                if result > 0:
+                    return JSONResponse(status_code=200, content={'status': 'OK'})
+        except jwt.PyJWTError:
+            return JSONResponse(status_code=401, content={'status': 'Unauthorized'})
+    return JSONResponse(status_code=401, content={'status': 'Unauthorized'})
+
+@app.post("/delete_tk")
+async def delete_tk(id: int):
+    result = delete_tk_by_id_controller(id)
+    
+    if result == 1:
+        return JSONResponse(content={"status": "OK"}, status_code=200)
+    elif result == 0:
+        return JSONResponse(content={"status": "ACTIVE"}, status_code=400)
+    else:
+        raise HTTPException(status_code=500, detail="ERROR")
+    
+
+@app.get('/get_ds_tai_khoan')
+async def get_ds_tai_khoan(token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            id = payload.get("id")
+            if permission == "user" and check_role(id, '/quanlytaikhoan'):
+                return get_ds_tai_khoan_controller()
+        except jwt.PyJWTError:
+            return RedirectResponse('/login')
+    return RedirectResponse('/login')
+# Thông tin chi tiết
+@app.get('/get_account_details/{idtk}')
+async def get_account_details(idtk: int, token: str = Cookie(None)):
+    if token:
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            permission = payload.get("permission")
+            id = payload.get("id")
+            if permission == "user" and check_role(id, '/quanlytaikhoan'):
+                account = get_tai_khoan_by_id_controller(idtk)
+                if account:
+                    return account
+                else:
+                    return {"error": "Tài khoản không tồn tại."}
+        except jwt.PyJWTError:
+            return RedirectResponse('/login')
+    return RedirectResponse('/login')
+
+
+# Code thêm tài khoản _ quản lý tài khoản spkt
+# class AddAccountRequest(BaseModel):
+#     idnv: int
+#     tk: str
+#     mk: str
+#     ngayt: str
+
+# @app.post('/them_tai_khoan')
+# async def add_account_route(request: AddAccountRequest):
+#     result = add_account_controller(request.idnv, request.tk, request.mk, request.ngayt)
+    
+#     if result == "OK":
+#         return JSONResponse(status_code=200, content={'status': 'OK'})
+#     elif result == "EXISTS":
+#         return JSONResponse(status_code=400, content={'status': 'EXISTS', 'detail': 'Tài khoản đã tồn tại hoặc không thể thêm.'})
+#     else:
+#         return JSONResponse(status_code=500, content={'status': 'ERROR', 'detail': result})
+
+
+# Yêu cầu thêm tài khoản
+class AddAccountRequest(BaseModel):
+    idnv: int
+    tk: str
+    mk: str
+
+import traceback
+
+@app.post('/them_tai_khoan')
+async def add_account_route(request: AddAccountRequest):
+    try:
+        print(f"Received Data: {request}")
+        result = add_account_controller(request.idnv, request.tk, request.mk)
+        
+        if result == "OK":
+            return JSONResponse(status_code=200, content={'status': 'OK'})
+        elif result == "EXISTS":
+            return JSONResponse(status_code=400, content={'status': 'EXISTS', 'detail': 'Tài khoản đã tồn tại hoặc không thể thêm.'})
+        else:
+            print(f"Unexpected result: {result}")
+            return JSONResponse(status_code=500, content={'status': 'ERROR', 'detail': 'Có lỗi xảy ra, vui lòng thử lại.'})
+    except Exception as e:
+        print(f"Error in route: {str(e)}")
+        print(traceback.format_exc())  # Log lại toàn bộ lỗi
+        return JSONResponse(status_code=500, content={'status': 'ERROR', 'detail': 'Có lỗi xảy ra, vui lòng thử lại.'})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Code cũ của src cũ
 # Middleware để bắt lỗi 404 và xử lý
-
 
 @app.middleware("http")
 async def catch_404(request, call_next):
@@ -1344,10 +1653,6 @@ async def get_ds_dia_chi_route():
     return JSONResponse(status_code=200, content=get_ds_dia_chi_controller())
 
 
-@app.get('/get_danh_sach_nganh')
-async def get_danh_sach_nganh_route():
-    return JSONResponse(status_code=200, content=get_danh_sach_nganh_controller())
-
 
 @app.get('/get_danh_sach_truong')
 async def get_danh_sach_truong_route():
@@ -1359,7 +1664,7 @@ async def thong_tin_sinh_vien_route(sv: ThongTinSV):
     result = insert_sinh_vien_controller(
         sv.mssv, sv.hoten, sv.gioitinh, sv.sdt, sv.email, sv.diachi, sv.malop, sv.truong, sv.nganh, sv.khoa, sha3_256(bytes(default_password, 'utf-8')).hexdigest())
     if result:
-        sent = send_otp_email(sv.email, sv.hoten)
+        sent = ""
         if sent:
             insert_taikhoan = insert_taikhoan_sinhvien_controller(
                 result, sha3_256(bytes(default_password, 'utf-8')).hexdigest(), 1)
@@ -1544,7 +1849,7 @@ async def gui_mail_otp(email: str):
         hoten = get_ho_ten_sv_by_email_controller(email)
         ngayHetHan = check_sv_con_han_thuc_tap(email)
         if (True):
-            send_otp_email(email, hoten)
+            # send_otp_email(email, hoten)
             return JSONResponse(status_code=200, content={'status': 'OK'})
         else:
             return JSONResponse(status_code=200, content={'status': 'Expired'})
@@ -1855,18 +2160,6 @@ async def quan_ly_tai_khoan(request: Request, token: str = Cookie(None)):
     return RedirectResponse('/login')
 
 
-@app.get('/get_ds_tai_khoan')
-async def get_ds_tai_khoan(token: str = Cookie(None)):
-    if token:
-        try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            permission = payload.get("permission")
-            id = payload.get("id")
-            if permission == "user" and check_role(id, '/quanlytaikhoan'):
-                return get_ds_tai_khoan_controller()
-        except jwt.PyJWTError:
-            return RedirectResponse('/login')
-    return RedirectResponse('/login')
 
 
 @app.post('/update_password')
@@ -2168,19 +2461,7 @@ async def canhbaodangnhap_route(noidung: str, token: str = Cookie(None)):
     return RedirectResponse('/login')
 
 
-# chuc nang danh muc
-@app.get('/danhmucnganh')
-async def danh_muc_nganh(request: Request, token: str = Cookie(None)):
-    if token:
-        try:
-            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-            permission = payload.get("permission")
-            uid = payload.get("id")
-            if permission == "user" and check_role(uid, '/danhmucnganh'):
-                return templates.TemplateResponse('danhmucnganh.html', context={'request': request})
-        except jwt.PyJWTError:
-            return RedirectResponse('/login')
-    return RedirectResponse('/login')
+
 
 
 # chuc nang them nganh
