@@ -56,9 +56,9 @@ $(function () {
       // eslint-disable-next-line no-alert
       alert(
         "You chose: " +
-        start.format("MMMM D, YYYY") +
-        " - " +
-        end.format("MMMM D, YYYY")
+          start.format("MMMM D, YYYY") +
+          " - " +
+          end.format("MMMM D, YYYY")
       );
     }
   );
@@ -268,7 +268,6 @@ $(function () {
     });
   });
 });
-
 // xem/sửa thông tin sinh viên
 $("#dashboard_bangdssv").on("click", "#viewBtn", function () {
   let id = $(this).data("id");
@@ -428,8 +427,8 @@ $("#dashboard_bangdssv").on("click", "#viewBtn", function () {
       $("#gioitinh_sv").val(res.gioitinh);
       $("#modal_footer").append(
         '<button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>  <button type="button" id="modal_save_button" data-id="' +
-        id +
-        '" class="btn btn-primary">Lưu</button>'
+          id +
+          '" class="btn btn-primary">Lưu</button>'
       );
       $("#modal_id").modal("show");
 
@@ -499,7 +498,122 @@ $("#dashboard_bangdssv").on("click", "#viewBtn", function () {
     },
   });
 });
+// Thanh Phú Danh Sách Nhân Viên
+$(document).ready(function () {
+  // Load danh sách chức vụ vào bộ lọc
+  $.ajax({
+    type: "GET",
+    url: "/get_all_chuc_vu",
+    success: function (data) {
+      if (data && data.length > 0) {
+        let positionSelect = $("#filterPosition");
+        data.forEach(function (position) {
+          positionSelect.append(new Option(position, position));
+        });
+      }
+    },
+  });
 
+  // Load danh sách trạng thái vào bộ lọc
+  $.ajax({
+    type: "GET",
+    url: "/get_all_trang_thai",
+    success: function (data) {
+      if (data && data.length > 0) {
+        let statusSelect = $("#filterStatus");
+        statusSelect.append(new Option("Đang làm việc", 1));
+        statusSelect.append(new Option("Nghỉ việc", 0));
+      }
+    },
+  });
+
+  // Load danh sách tỉnh thành vào bộ lọc
+  $.ajax({
+    type: "GET",
+    url: "/get_all_provinces",
+    success: function (data) {
+      if (data && data.length > 0) {
+        let provinceSelect = $("#filterProvince");
+        data.forEach(function (province) {
+          provinceSelect.append(new Option(province, province));
+        });
+      }
+    },
+  });
+
+  let dashboard_bangdsnv = $("#dashboard_bangdsnv").DataTable({
+    paging: true,
+    lengthChange: false,
+    searching: true,
+    pageLength: 20, // Giới hạn số lượng nhân viên hiển thị tối đa là 20
+    order: [[1, "asc"]], // Sắp xếp ID theo thứ tự tăng dần
+    info: true,
+    autoWidth: false,
+    responsive: true,
+    language: {
+      search: "Tìm Kiếm Nhanh:", // Thay đổi chữ "Search" thành "Tìm Kiếm Nhanh:"
+    },
+    ajax: {
+      type: "GET",
+      url: "/get_all_nhan_vien",
+      dataSrc: "",
+    },
+    columns: [
+      {
+        data: null,
+        render: function (data, type, row, meta) {
+          return "<center>" + (meta.row + 1) + "</center>";
+        },
+      },
+      { data: "id" },
+      { data: "hoten" },
+      {
+        data: "gioitinh",
+        render: function (data, type, row) {
+          return data == 0 ? "Nữ" : "Nam";
+        },
+      },
+      { data: "dienthoai" },
+      { data: "email" },
+      { data: "diachi" },
+      { data: "tenvt" },
+      {
+        data: "trangthai",
+        render: function (data, type, row) {
+          if (data == 1) {
+            return '<span style="color: green;">Đang làm việc</span>';
+          } else {
+            return '<span style="color: red;">Nghỉ việc</span>';
+          }
+        },
+      },
+    ],
+  });
+
+  window.filterTable = function () {
+    let gender = $("#filterGender").val();
+    let position = $("#filterPosition").val();
+    let status = $("#filterStatus").val();
+    let province = $("#filterProvince").val();
+
+    dashboard_bangdsnv
+      .column(3)
+      .search(gender !== "all" ? gender : "")
+      .draw();
+    dashboard_bangdsnv
+      .column(7)
+      .search(position !== "all" ? position : "")
+      .draw();
+    dashboard_bangdsnv
+      .column(8)
+      .search(status !== "all" ? status : "")
+      .draw();
+    dashboard_bangdsnv
+      .column(6)
+      .search(province !== "all" ? province : "")
+      .draw();
+  };
+});
 // Submit sửa thông tin sinh viên
 
 // Xóa thông tin sinh viên
@@ -519,7 +633,7 @@ $("#dashboard_bangdssv").on("click", "#deleteBtn", function () {
         type: "POST",
         url: "update_xoa_sinh_vien_by_id?id=" + parseInt(id),
         success: function (res) {
-          if (res.status == 'OK') {
+          if (res.status == "OK") {
             Toast.fire({
               icon: "success",
               title: "Đã xoá",
@@ -528,7 +642,7 @@ $("#dashboard_bangdssv").on("click", "#deleteBtn", function () {
           } else {
             Toast.fire({
               icon: "warning",
-              title: "Xoá sinh viên thất bại do sinh viên đã có nhóm thực tập"
+              title: "Xoá sinh viên thất bại do sinh viên đã có nhóm thực tập",
             });
           }
         },
@@ -557,7 +671,7 @@ $("#dashboard_dssinhviendanhgia").DataTable({
     dataSrc: "",
     error: function () {
       $.fn.dataTable.ext.errMode = "throw";
-    }
+    },
   },
   columns: [
     {
@@ -661,3 +775,512 @@ function convertDoHaiLong(num) {
     return `<span class="badge badge-danger">Không hài lòng</span>`;
   }
 }
+document.addEventListener("DOMContentLoaded", function () {
+  // Biểu đồ số lượng nhân viên theo vai trò
+  const nhanVienTheoVaiTro = JSON.parse(
+    document.getElementById("nhan_vien_theo_vai_tro").textContent
+  );
+  const labelsVaiTro = nhanVienTheoVaiTro.map((item) => item.role);
+  const dataVaiTro = nhanVienTheoVaiTro.map((item) => item.count);
+
+  const colors = [
+    "rgba(54, 162, 235, 0.2)",
+    "rgba(75, 192, 192, 0.2)",
+    "rgba(255, 206, 86, 0.2)",
+    "rgba(153, 102, 255, 0.2)",
+    "rgba(255, 159, 64, 0.2)",
+  ];
+
+  const borderColors = [
+    "rgba(54, 162, 235, 1)",
+    "rgba(75, 192, 192, 1)",
+    "rgba(255, 206, 86, 1)",
+    "rgba(153, 102, 255, 1)",
+    "rgba(255, 159, 64, 1)",
+  ];
+
+  const ctxRole = document.getElementById("role-chart-canvas").getContext("2d");
+  new Chart(ctxRole, {
+    type: "pie",
+    data: {
+      labels: labelsVaiTro,
+      datasets: [
+        {
+          label: "Số Lượng",
+          data: dataVaiTro,
+          backgroundColor: colors,
+          borderColor: borderColors,
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: true,
+          position: "top",
+        },
+        tooltip: {
+          callbacks: {
+            label: function (tooltipItem) {
+              const index = tooltipItem.dataIndex;
+              const value = dataVaiTro[index];
+              const label = labelsVaiTro[index];
+              return `${label}: ${value}`;
+            },
+          },
+        },
+      },
+    },
+  });
+});
+
+// Thanh Phú Tỷ lệ chấm công
+$(document).ready(function () {
+  // Load attendance rate data and create line chart
+  function loadMonthlyAttendanceRate() {
+    $.ajax({
+      type: "GET",
+      url: "/get_monthly_attendance_rate",
+      success: function (response) {
+        if (response.error) {
+          console.log("Error: ", response.error);
+          return;
+        }
+        let labels = response.map((item) => `Tháng ${item.month}`);
+        let data = response.map((item) => item.attendance_rate);
+        var ctx = document
+          .getElementById("attendance_rate_line_chart")
+          .getContext("2d");
+        var attendanceRateChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Tỷ lệ chấm công (%)",
+                data: data,
+                borderWidth: 1,
+                backgroundColor: "rgba(75, 192, 192, 0.2)",
+                borderColor: "rgba(75, 192, 192, 1)",
+                fill: true,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function (value) {
+                    return value + "%";
+                  },
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                position: "bottom",
+              },
+            },
+          },
+        });
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.log("AJAX call failed: ", textStatus, errorThrown);
+      },
+    });
+  }
+});
+
+// Thanh Phú Thống Nhân Viên Chưa Chấm Công
+$(document).ready(function () {
+  // Load danh sách phòng ban vào bộ lọc báo cáo
+  $.ajax({
+    type: "GET",
+    url: "/get_all_phong_ban",
+    success: function (data) {
+      if (data && data.length > 0) {
+        let departmentSelect = $("#reportDepartment");
+        data.forEach(function (department) {
+          departmentSelect.append(new Option(department, department));
+        });
+      }
+    },
+  });
+
+  // Load danh sách chức vụ vào bộ lọc báo cáo
+  $.ajax({
+    type: "GET",
+    url: "/get_all_chuc_vu",
+    success: function (data) {
+      if (data && data.length > 0) {
+        let positionSelect = $("#reportPosition");
+        data.forEach(function (position) {
+          positionSelect.append(new Option(position, position));
+        });
+      }
+    },
+  });
+
+  let dashboard_bangdsnv_kcc = $("#dashboard_bangdsnv_kcc").DataTable({
+    paging: true,
+    lengthChange: false,
+    searching: true,
+    pageLength: 20,
+    order: [[1, "asc"]],
+    info: true,
+    autoWidth: false,
+    responsive: true,
+    language: {
+      search: "Tìm Kiếm Nhanh:",
+    },
+    ajax: {
+      type: "GET",
+      url: "/get_all_nhan_vien_khong_cham_cong",
+      dataSrc: "",
+    },
+    columns: [
+      {
+        data: null,
+        render: function (data, type, row, meta) {
+          return "<center>" + (meta.row + 1) + "</center>";
+        },
+      },
+      { data: "id" },
+      { data: "hoten" },
+      {
+        data: "gioitinh",
+        render: function (data, type, row) {
+          return data == 0 ? "Nữ" : "Nam";
+        },
+      },
+      { data: "dienthoai" },
+      { data: "email" },
+      { data: "diachi" },
+      { data: "tenvt" },
+      { data: "tenpb" },
+      { data: "trangthai" }, // Cột trạng thái
+    ],
+    rowCallback: function (row, data) {
+      let trangThaiCell = $(row).find("td").eq(9); // Cột trạng thái nằm ở vị trí thứ 9 (bắt đầu từ 0)
+      if (data.trangthai === "Đi trễ") {
+        trangThaiCell.css("color", "orange"); // Tô màu vàng cho nhân viên đi trễ
+      } else {
+        trangThaiCell.css("color", "red"); // Tô màu đỏ cho nhân viên chưa chấm công
+      }
+    },
+  });
+
+  window.filterReport = function () {
+    let department = $("#reportDepartment").val();
+    let position = $("#reportPosition").val();
+    let date = $("#reportDate").val();
+
+    let filter = {
+      department: department !== "all" ? department : "",
+      position: position !== "all" ? position : "",
+      date: date,
+    };
+
+    dashboard_bangdsnv_kcc.ajax
+      .url("/get_all_nhan_vien_khong_cham_cong?" + $.param(filter))
+      .load();
+  };
+});
+$(document).ready(function () {
+  // Thiết lập ngày mặc định là ngày hôm nay
+  let today = new Date().toISOString().substr(0, 10);
+  document.getElementById("reportDate").value = today;
+
+  // Load dữ liệu báo cáo theo ngày mặc định
+  filterReport();
+});
+
+// Thanh Phú biểu đồ hiệu suất
+function loadPerformanceChart() {
+  $.ajax({
+    type: "GET",
+    url: "/get_performance_by_department",
+    success: function (response) {
+      const months = [
+        "Tháng 1",
+        "Tháng 2",
+        "Tháng 3",
+        "Tháng 4",
+        "Tháng 5",
+        "Tháng 6",
+        "Tháng 7",
+        "Tháng 8",
+        "Tháng 9",
+        "Tháng 10",
+        "Tháng 11",
+        "Tháng 12",
+      ];
+      const datasets = [];
+
+      Object.keys(response).forEach((department, index) => {
+        datasets.push({
+          label: department,
+          data: response[department],
+          fill: false,
+          borderColor: [
+            "rgba(255, 99, 132, 1)",
+            "rgba(255, 159, 64, 1)",
+            "rgba(255, 205, 86, 1)",
+            "rgba(75, 192, 192, 1)",
+            "rgba(54, 162, 235, 1)",
+            "rgba(153, 102, 255, 1)",
+            "rgba(201, 203, 207, 1)",
+          ][index % 7],
+          tension: 0.1,
+        });
+      });
+
+      const ctx = document
+        .getElementById("performance-chart-canvas")
+        .getContext("2d");
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: months,
+          datasets: datasets,
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              display: true,
+              position: "top",
+            },
+            tooltip: {
+              callbacks: {
+                label: function (tooltipItem) {
+                  return `Số giờ: ${tooltipItem.raw}`;
+                },
+              },
+            },
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+            },
+            y: {
+              beginAtZero: true,
+              max: 100, // Tùy chỉnh giá trị tối đa của trục y nếu cần thiết
+              ticks: {
+                stepSize: 10, // Tùy chỉnh khoảng cách giữa các giá trị trên trục y
+                callback: function (value) {
+                  return Number.isInteger(value) ? value : null; // Chỉ hiển thị số nguyên
+                },
+              },
+            },
+          },
+        },
+      });
+    },
+  });
+}
+
+$(document).ready(function () {
+  loadPerformanceChart(); // Load chart on page load
+});
+
+/// Thanh Phú Biểu đồ đi trễ về sớm theo tháng
+function loadAttendancePercentagesChart() {
+  $.ajax({
+    type: "GET",
+    url: "/get_attendance_percentages_by_month",
+    success: function (response) {
+      const months = [
+        "Tháng 1",
+        "Tháng 2",
+        "Tháng 3",
+        "Tháng 4",
+        "Tháng 5",
+        "Tháng 6",
+        "Tháng 7",
+        "Tháng 8",
+        "Tháng 9",
+        "Tháng 10",
+        "Tháng 11",
+        "Tháng 12",
+      ];
+
+      const ctx = document
+        .getElementById("attendance-percentages-chart-canvas")
+        .getContext("2d");
+
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: months,
+          datasets: [
+            {
+              label: "Đi Trễ",
+              data: response.early_leave_percentage,
+              backgroundColor: "rgba(255, 99, 132, 0.5)",
+              borderColor: "rgba(255, 99, 132, 1)",
+              borderWidth: 1,
+            },
+            {
+              label: "Về Sớm",
+              data: response.late_percentage,
+              backgroundColor: "rgba(255, 159, 64, 0.5)",
+              borderColor: "rgba(255, 159, 64, 1)",
+              borderWidth: 1,
+            },
+            {
+              label: "Đúng giờ",
+              data: response.on_time_percentage,
+              backgroundColor: "rgba(75, 192, 192, 0.5)",
+              borderColor: "rgba(75, 192, 192, 1)",
+              borderWidth: 1,
+            },
+            {
+              label: "Nghỉ",
+              data: response.absent_percentage,
+              backgroundColor: "rgba(54, 162, 235, 0.5)",
+              borderColor: "rgba(54, 162, 235, 1)",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              stacked: true,
+            },
+            y: {
+              stacked: true,
+              beginAtZero: true,
+              max: 100,
+              ticks: {
+                callback: function (value) {
+                  return value + "%";
+                },
+              },
+            },
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function (tooltipItem) {
+                  return (
+                    tooltipItem.dataset.label + ": " + tooltipItem.raw + "%"
+                  );
+                },
+              },
+            },
+          },
+        },
+      });
+    },
+  });
+}
+
+$(document).ready(function () {
+  loadAttendancePercentagesChart(); // Load chart on page load
+});
+
+/////// Tỷ lệ đi làm đúng giờ giữa các phòng ban
+function loadOnTimeRateByDepartmentChart() {
+  $.ajax({
+    type: "GET",
+    url: "/get_on_time_rate_by_department_by_month",
+    success: function (response) {
+      const ctx = document
+        .getElementById("on-time-rate-chart-canvas")
+        .getContext("2d");
+
+      const months = [
+        "Tháng 1",
+        "Tháng 2",
+        "Tháng 3",
+        "Tháng 4",
+        "Tháng 5",
+        "Tháng 6",
+        "Tháng 7",
+        "Tháng 8",
+        "Tháng 9",
+        "Tháng 10",
+        "Tháng 11",
+        "Tháng 12",
+      ];
+
+      const colors = [
+        "rgba(255, 99, 132, 0.7)", // Màu đỏ nhạt
+        "rgba(54, 162, 235, 0.7)", // Màu xanh dương nhạt
+        "rgba(75, 192, 192, 0.7)", // Màu xanh lá nhạt
+        "rgba(153, 102, 255, 0.7)", // Màu tím nhạt
+        "rgba(255, 159, 64, 0.7)", // Màu cam nhạt
+        "rgba(255, 205, 86, 0.7)", // Màu vàng nhạt
+        "rgba(201, 203, 207, 0.7)", // Màu xám nhạt
+      ];
+
+      const borderColors = [
+        "rgba(255, 99, 132, 1)",
+        "rgba(54, 162, 235, 1)",
+        "rgba(75, 192, 192, 1)",
+        "rgba(153, 102, 255, 1)",
+        "rgba(255, 159, 64, 1)",
+        "rgba(255, 205, 86, 1)",
+        "rgba(201, 203, 207, 1)",
+      ];
+
+      const datasets = Object.keys(response).map((department, index) => {
+        return {
+          label: department,
+          data: response[department],
+          backgroundColor: colors[index % colors.length],
+          borderColor: borderColors[index % borderColors.length],
+          borderWidth: 1,
+        };
+      });
+
+      new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: months,
+          datasets: datasets,
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              stacked: true,
+              beginAtZero: true,
+            },
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: {
+                callback: function (value) {
+                  return value + "%";
+                },
+              },
+            },
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function (tooltipItem) {
+                  return (
+                    tooltipItem.dataset.label + ": " + tooltipItem.raw + "%"
+                  );
+                },
+              },
+            },
+          },
+        },
+      });
+    },
+  });
+}
+
+$(document).ready(function () {
+  loadOnTimeRateByDepartmentChart(); // Load chart on page load
+});
